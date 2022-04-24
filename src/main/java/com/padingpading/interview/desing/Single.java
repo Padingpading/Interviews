@@ -24,6 +24,4 @@ public class Single {
         }
         return single;
     }
-
-    static  class
 }
