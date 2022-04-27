@@ -863,15 +863,16 @@
 //     */
 //    private void readObject(java.io.ObjectInputStream s)
 //        throws java.io.IOException, ClassNotFoundException {
-//        //
+//        //空的大小
 //        elementData = EMPTY_ELEMENTDATA;
 //
 //        // Read in size, and any hidden stuff
+//        //属性赋值
 //        s.defaultReadObject();
 //
 //        // Read in capacity
 //        s.readInt(); // ignored
-//        //读取size大小。
+//        //只有数组的大小大于0才会读取
 //        if (size > 0) {
 //            // be like clone(), allocate array based upon size not capacity
 //            int capacity = calculateCapacity(elementData, size);

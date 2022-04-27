@@ -11,4 +11,6 @@ public interface SysConstant {
     
     String SERIAL_PATH = ROOT_PATH + "serial\\";
     
+    String LIST_PATH = ROOT_PATH + "list\\";
+    
 }
