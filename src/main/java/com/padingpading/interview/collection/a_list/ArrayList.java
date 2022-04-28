@@ -278,6 +278,7 @@
 //     * Attempts to allocate larger arrays may result in
 //     * OutOfMemoryError: Requested array size exceeds VM limit
 //     */
+//    //2的31次-8   8位留给 数组的length？
 //    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 //
 //    /**扩容方法
