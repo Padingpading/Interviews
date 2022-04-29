@@ -7,6 +7,7 @@ import java.lang.ref.SoftReference;
  * -Xms10m -Xmx10m -XX:+PrintGCDetails
  */
 public class SoftReferenceTest {
+    
     public static class User {
         public User(int id, String name) {
             this.id = id;
