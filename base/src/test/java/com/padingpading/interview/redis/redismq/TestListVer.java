@@ -1,6 +1,6 @@
 package com.padingpading.interview.redis.redismq;
 
-import com.padingpading.interview.redis.redisbase.RedisListBlockQueue;
+import com.padingpading.interview.jvm.RedisListBlockQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

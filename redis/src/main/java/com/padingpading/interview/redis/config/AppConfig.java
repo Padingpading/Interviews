@@ -1,6 +1,6 @@
 package com.padingpading.interview.redis.config;
 
-import com.padingpading.interview.redis.redisbase.advtypes.RedisBloomFilter;
+import com.padingpading.interview.jvm.advtypes.RedisBloomFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
