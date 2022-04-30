@@ -4,7 +4,7 @@ package com.padingpading.interview.jvm.a_loading.loadtime;
 import com.fasterxml.jackson.databind.node.POJONode;
 
 /**
- * 类的静态变量主动使用
+ * 类的静态变量主动使用,加载
  */
 public class LoadOrder {
     
