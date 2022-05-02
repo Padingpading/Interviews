@@ -1,10 +1,13 @@
-package com.padingpading.interview.jvm.advtypes;
+package com.padingpading.interview.redis.func.hyperLogLog;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * 统计uv
+ */
 @Component
 public class RedisHLL {
 

@@ -1,4 +1,4 @@
-package com.padingpading.interview.redis.basetypes;
+package com.padingpading.interview.redis.HyperLogLog;
 
 import com.padingpading.interview.redis.func.hyperLogLog.RedisHLL;
 import org.junit.jupiter.api.Test;

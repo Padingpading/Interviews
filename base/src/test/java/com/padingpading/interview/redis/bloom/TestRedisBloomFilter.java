@@ -1,4 +1,4 @@
-package com.padingpading.interview.redis.basetypes;
+package com.padingpading.interview.redis.bloom;
 
 import com.padingpading.interview.redis.func.bloom.RedisBloomFilter;
 import org.junit.jupiter.api.Test;

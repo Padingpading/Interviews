@@ -1,4 +1,4 @@
-package com.padingpading.interview.jvm.advtypes;
+package com.padingpading.interview.redis.func.bloom;
 
 import com.google.common.hash.Funnels;
 import com.google.common.hash.Hashing;
@@ -14,10 +14,14 @@ import java.nio.charset.Charset;
 public class RedisBloomFilter {
 
     public final static String RS_BF_NS = "rbf:";
-    private int numApproxElements; /*预估元素数量*/
-    private double fpp; /*可接受的最大误差*/
-    private int numHashFunctions; /*自动计算的hash函数个数*/
-    private int bitmapLength; /*自动计算的最优Bitmap长度*/
+    /*预估元素数量*/
+    private int numApproxElements;
+    /*可接受的最大误差*/
+    private double fpp;
+    /*自动计算的hash函数个数*/
+    private int numHashFunctions;
+    /*自动计算的最优Bitmap长度*/
+    private int bitmapLength;
 
     @Autowired
     private JedisPool jedisPool;
@@ -38,7 +42,7 @@ public class RedisBloomFilter {
         return  this;
     }
 
-    /**
+    /**模拟谷歌的hash函数
      * 计算一个元素值哈希后映射到Bitmap的哪些bit上
      * 用两个hash函数来模拟多个hash函数的情况
      *     * @param element 元素值
@@ -84,9 +88,12 @@ public class RedisBloomFilter {
 
         try (Jedis jedis = jedisPool.getResource()) {
             try (Pipeline pipeline = jedis.pipelined()) {
+                //产生的下标
                 for (long index : getBitIndices(element)) {
+                    //插入key中的位,
                     pipeline.setbit(actualKey, index, true);
                 }
+                //批量操作
                 pipeline.syncAndReturnAll();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -113,6 +120,7 @@ public class RedisBloomFilter {
                 for (long index : getBitIndices(element)) {
                     pipeline.getbit(actualKey, index);
                 }
+                //批量操作
                 result = !pipeline.syncAndReturnAll().contains(false);
             } catch (Exception ex) {
                 ex.printStackTrace();
