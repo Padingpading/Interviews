@@ -1,27 +1,5 @@
-///*
-// * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
-// * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// */
+package com.padingpading.interview.jvm.classloader.g_jdbc;//package com.padingpading.interview.advance.spi.jdbc;
+//
 //
 //package com.padingpading.interview.jvm.classloader.g_jdbc;
 //
@@ -45,7 +23,7 @@
 //
 //
 //    // List of registered JDBC drivers
-//    private final static CopyOnWriteArrayList<DriverInfo> registeredDrivers = new CopyOnWriteArrayList<>();
+//    private final staticCopyOnWriteArrayList<DriverInfo> registeredDrivers  = new CopyOnWriteArrayList<>();
 //    private static volatile int loginTimeout = 0;
 //    private static volatile java.io.PrintWriter logWriter = null;
 //    private static volatile java.io.PrintStream logStream = null;
@@ -61,6 +39,7 @@
 //     * jdbc.properties and then use the {@code ServiceLoader} mechanism
 //     */
 //    static {
+//        // 加载驱动实现类
 //        loadInitialDrivers();
 //        println("JDBC DriverManager initialized");
 //    }
@@ -167,7 +146,7 @@
 //    @CallerSensitive
 //    public static Connection getConnection(String url,
 //        java.util.Properties info) throws SQLException {
-//
+//        // 继续调用getConnection方法来连接数据库
 //        return (getConnection(url, info, Reflection.getCallerClass()));
 //    }
 //
@@ -293,24 +272,13 @@
 //     */
 //    public static synchronized void registerDriver(Driver driver)
 //        throws SQLException {
-//
+//        // 继续调用registerDriver方法
 //        registerDriver(driver, null);
 //    }
 //
+//
 //    /**
-//     * Registers the given driver with the {@code DriverManager}.
-//     * A newly-loaded driver class should call
-//     * the method {@code registerDriver} to make itself
-//     * known to the {@code DriverManager}. If the driver is currently
-//     * registered, no action is taken.
-//     *
-//     * @param driver the new JDBC Driver that is to be registered with the
-//     *               {@code DriverManager}
-//     * @param da     the {@code DriverAction} implementation to be used when
-//     *               {@code DriverManager#deregisterDriver} is called
-//     * @exception SQLException if a database access error occurs
-//     * @exception NullPointerException if {@code driver} is null
-//     * @since 1.8
+//     * 注册
 //     */
 //    public static synchronized void registerDriver(Driver driver,
 //            DriverAction da)
@@ -318,6 +286,7 @@
 //
 //        /* Register the driver if it has not already been added to our list */
 //        if(driver != null) {
+//            // 将driver驱动类实例注册进registeredDrivers集合
 //            registeredDrivers.addIfAbsent(new DriverInfo(driver, da));
 //        } else {
 //            // This is for compatibility with the original DriverManager
@@ -545,28 +514,16 @@
 //
 //        AccessController.doPrivileged(new PrivilegedAction<Void>() {
 //            public Void run() {
-//
+//                // 来到这里，是不是感觉似曾相识，对，没错，我们在前面的JdkSPITest代码中执行过下面的两句代码
+//                // 这句代码前面已经分析过，这里不会真正加载服务提供者实现类
+//                // 而是实例化一个ServiceLoader对象且实例化一个LazyIterator对象用于懒加载
 //                ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);
 //                Iterator<Driver> driversIterator = loadedDrivers.iterator();
-//
-//                /* Load these drivers, so that they can be instantiated.
-//                 * It may be the case that the driver class may not be there
-//                 * i.e. there may be a packaged driver with the service class
-//                 * as implementation of java.sql.Driver but the actual class
-//                 * may be missing. In that case a java.util.ServiceConfigurationError
-//                 * will be thrown at runtime by the VM trying to locate
-//                 * and load the service.
-//                 *
-//                 * Adding a try catch block to catch those runtime errors
-//                 * if driver not available in classpath but it's
-//                 * packaged as service and that service is there in classpath.
-//                 */
 //                try{
 //                    while(driversIterator.hasNext()) {
 //                        driversIterator.next();
 //                    }
 //                } catch(Throwable t) {
-//                // Do nothing
 //                }
 //                return null;
 //            }
@@ -621,11 +578,14 @@
 //        for(DriverInfo aDriver : registeredDrivers) {
 //            // If the caller does not have permission to load the driver then
 //            // skip it.
+//            // 遍历registeredDrivers集合，注意之前加载的Mysql驱动类实例被注册进这个集合
 //            if(isDriverAllowed(aDriver.driver, callerCL)) {
 //                try {
 //                    println("    trying " + aDriver.driver.getClass().getName());
-//                    //获取连接
+//                    // 利用Mysql驱动类来连接数据库
+//                    /*************【主线，重点关注】*****************/
 //                    Connection con = aDriver.driver.connect(url, info);
+//                    // 只要连接上，那么加载的其余驱动类比如FabricMySQLDriver将会忽略，因为下面直接返回了
 //                    if (con != null) {
 //                        // Success!
 //                        println("getConnection returning " + aDriver.driver.getClass().getName());
