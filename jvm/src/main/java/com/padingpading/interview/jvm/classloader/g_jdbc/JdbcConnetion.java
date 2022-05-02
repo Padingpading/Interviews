@@ -11,6 +11,7 @@ public class JdbcConnetion {
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         //使用调用者的的classLoader加载Driver
+        
         Class.forName("com.mysql.jdbc.Driver");
         Connection connection = DriverManager
                 .getConnection("jdbc:mysql://rm-uf63ey8y71gkx24r8no.mysql.rds.aliyuncs.com", "zeus", "Zeus123123");

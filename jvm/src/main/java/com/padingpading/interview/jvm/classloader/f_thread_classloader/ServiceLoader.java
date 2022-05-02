@@ -196,10 +196,11 @@ import java.util.ServiceConfigurationError;
 //4、服务加载器创建一个接口的单个实例 内置有缓存,
 // LinkedHashMap<String,S> provider
 // key:              value:具体实现
+//实现ServiceLoader接口
 public final class ServiceLoader<S>
     implements Iterable<S>
 {
-
+    //加载地址
     private static final String PREFIX = "META-INF/services/";
 
     // The class or interface representing the service being loaded
@@ -213,25 +214,25 @@ public final class ServiceLoader<S>
 
     // Cached providers, in instantiation order
     private LinkedHashMap<String,S> providers = new LinkedHashMap<>();
-
-    // The current lazy-lookup iterator
-    private LazyIterator lookupIterator;
-
+    
     /**
-     * Clear this loader's provider cache so that all providers will be
-     * reloaded.
-     *
-     * <p> After invoking this method, subsequent invocations of the {@link
-     * #iterator() iterator} method will lazily look up and instantiate
-     * providers from scratch, just as is done by a newly-created loader.
-     *
-     * <p> This method is intended for use in situations in which new providers
-     * can be installed into a running Java virtual machine.
+     * 懒加载迭代器:只有在使用的时候,参会接在Service的实现
+     * 有缓存迭代缓存,无缓存迭代路径
+     * Class<S> service:待加载的class对象
+     * ClassLoader loader:ClassLoader对象
+     */
+    private LazyIterator lookupIterator;
+    
+    
+    /**
+     * 重新加载
+     * 1、清空缓存
+     * 2、创建懒加载迭代器
      */
     public void reload() {
         //已经加载的清空
         providers.clear();
-        //创建LazyIterator
+        //创建LazyIterator,懒加载迭代器,使用的时候才会去迭代加载类。
         lookupIterator = new LazyIterator(service, loader);
     }
 
@@ -335,9 +336,8 @@ public final class ServiceLoader<S>
         }
         return names.iterator();
     }
-
-    // Private inner class implementing fully-lazy provider lookup
-    //
+    
+    // ServiceLoader的内部类LazyIterator,实现了【Iterator】接口
     private class LazyIterator
         implements Iterator<S>
     {
@@ -345,6 +345,7 @@ public final class ServiceLoader<S>
         Class<S> service;
         //ClassLoader对象
         ClassLoader loader;
+        //加载所有的
         Enumeration<URL> configs = null;
         Iterator<String> pending = null;
         String nextName = null;
@@ -353,14 +354,20 @@ public final class ServiceLoader<S>
             this.service = service;
             this.loader = loader;
         }
-
+    
+        /**
+         * 1、从/META-INF/services/加载(只会第一次加载)List<URL>
+         * 2、遍历加载 类全限定名。
+         */
         private boolean hasNextService() {
             if (nextName != null) {
                 return true;
             }
+            //第一次进去才会加载
             if (configs == null) {
                 try {
                     //META-INF/services/+类名字
+                    //service.getName()即接口的全限定名
                     String fullName = PREFIX + service.getName();
                     if (loader == null)
                         configs = ClassLoader.getSystemResources(fullName);
@@ -375,8 +382,10 @@ public final class ServiceLoader<S>
                 if (!configs.hasMoreElements()) {
                     return false;
                 }
+                // 返回META-INF/services/目录下的接口文件中的服务提供者类并赋值给pending属性
                 pending = parse(service, configs.nextElement());
             }
+            // 然后取出一个全限定名赋值给LazyIterator的成员变量nextName
             nextName = pending.next();
             return true;
         }
@@ -385,7 +394,7 @@ public final class ServiceLoader<S>
             //根据类名从资源目录加载文件
             if (!hasNextService())
                 throw new NoSuchElementException();
-            //加载出的实现类名字
+            //hasNextService中指定的下一个全限定类名字
             String cn = nextName;
             nextName = null;
             Class<?> c = null;
@@ -403,10 +412,11 @@ public final class ServiceLoader<S>
                      "Provider " + cn  + " not a subtype");
             }
             try {
-                //创建实例对象
+                // 【2】实例化刚才加载的服务提供者实现类，并进行转换
                 S p = service.cast(c.newInstance());
-                //放入缓存。
+                // 【3】最终将实例化后的服务提供者实现类放进providers集合
                 providers.put(cn, p);
+                //返回
                 return p;
             } catch (Throwable x) {
                 fail(service,
@@ -475,13 +485,14 @@ public final class ServiceLoader<S>
                                             ClassLoader loader)
     {
         //创建ServiceLoader
+        // 将service接口类和线程上下文类加载器作为构造参数，新建了一个ServiceLoader对象
         return new ServiceLoader<>(service, loader);
     }
 
     //
     public static <S> ServiceLoader<S> load(Class<S> service) {
         //获取当前线程的上线文加载器 应用类加载器,传入。
-        //如果不传入该加载器,使用的是加载当前类的加载器进行加载。
+        //如果不传入该加载器,使用的是加载当前类的加载器(启动类加载器)进行加载,无法进行加载
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         return ServiceLoader.load(service, cl);
     }
