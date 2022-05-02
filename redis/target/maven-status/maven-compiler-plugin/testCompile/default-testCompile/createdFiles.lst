@@ -1,0 +1,4 @@
+com\padingpading\interview\redis\basetypes\TestRedisHLL.class
+com\padingpading\interview\redis\basetypes\TestRedisBloomFilter.class
+com\padingpading\interview\redis\basetypes\TestRedisString.class
+com\padingpading\interview\redis\basetypes\TestRedisGEO.class

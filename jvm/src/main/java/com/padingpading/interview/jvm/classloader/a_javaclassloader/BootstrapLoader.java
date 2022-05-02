@@ -38,5 +38,7 @@ public class BootstrapLoader {
         //file:/D:/Java/jdk1.8.0_101/jre/lib/jfr.jar
         //file:/D:/Java/jdk1.8.0_101/jre/classes
         //null
+        //应用加载器的变更
+        System.out.println(System.getProperty("java.system.class.loader"));
     }
 }

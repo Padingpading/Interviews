@@ -36,6 +36,7 @@
 //import java.io.File;
 //import java.io.IOException;
 //import java.io.InputStream;
+//import java.lang.reflect.Constructor;
 //import java.lang.reflect.InvocationTargetException;
 //import java.net.URL;
 //import java.security.AccessControlContext;
@@ -44,6 +45,7 @@
 //import java.security.Policy;
 //import java.security.PrivilegedAction;
 //import java.security.PrivilegedActionException;
+//import java.security.PrivilegedExceptionAction;
 //import java.security.ProtectionDomain;
 //import java.security.cert.Certificate;
 //import java.util.Collections;
@@ -1100,82 +1102,40 @@
 //    }
 //
 //    /**
-//     * Returns the system class loader for delegation.  This is the default
-//     * delegation parent for new <tt>ClassLoader</tt> instances, and is
-//     * typically the class loader used to start the application.
-//     *
-//     * <p> This method is first invoked early in the runtime's startup
-//     * sequence, at which point it creates the system class loader and sets it
-//     * as the context class loader of the invoking <tt>Thread</tt>.
-//     *
-//     * <p> The default system class loader is an implementation-dependent
-//     * instance of this class.
-//     *
-//     * <p> If the system property "<tt>java.system.class.loader</tt>" is defined
-//     * when this method is first invoked then the value of that property is
-//     * taken to be the name of a class that will be returned as the system
-//     * class loader.  The class is loaded using the default system class loader
-//     * and must define a public constructor that takes a single parameter of
-//     * type <tt>ClassLoader</tt> which is used as the delegation parent.  An
-//     * instance is then created using this constructor with the default system
-//     * class loader as the parameter.  The resulting class loader is defined
-//     * to be the system class loader.
-//     *
-//     * <p> If a security manager is present, and the invoker's class loader is
-//     * not <tt>null</tt> and the invoker's class loader is not the same as or
-//     * an ancestor of the system class loader, then this method invokes the
-//     * security manager's {@link
-//     * SecurityManager#checkPermission(java.security.Permission)
-//     * <tt>checkPermission</tt>} method with a {@link
-//     * RuntimePermission#RuntimePermission(String)
-//     * <tt>RuntimePermission("getClassLoader")</tt>} permission to verify
-//     * access to the system class loader.  If not, a
-//     * <tt>SecurityException</tt> will be thrown.  </p>
-//     *
-//     * @return  The system <tt>ClassLoader</tt> for delegation, or
-//     *          <tt>null</tt> if none
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <tt>checkPermission</tt>
-//     *          method doesn't allow access to the system class loader.
-//     *
-//     * @throws  IllegalStateException
-//     *          If invoked recursively during the construction of the class
-//     *          loader specified by the "<tt>java.system.class.loader</tt>"
-//     *          property.
-//     *
-//     * @throws  Error
-//     *          If the system property "<tt>java.system.class.loader</tt>"
-//     *          is defined but the named class could not be loaded, the
-//     *          provider class does not define the required constructor, or an
-//     *          exception is thrown by that constructor when it is invoked. The
-//     *          underlying cause of the error can be retrieved via the
-//     *          {@link Throwable#getCause()} method.
-//     *
-//     * @revised  1.4
+//     * 1、用户自动以父加载器和应用启动的加载器。
+//     * 2、创建系统类加载器,设置为线程的上线文类加载器。
+//     * 3、
 //     */
 //    @CallerSensitive
 //    public static ClassLoader getSystemClassLoader() {
+//        //初始化系统类加载器
 //        initSystemClassLoader();
 //        if (scl == null) {
 //            return null;
 //        }
+//        //
 //        SecurityManager sm = System.getSecurityManager();
 //        if (sm != null) {
 //            checkClassLoaderPermission(scl, Reflection.getCallerClass());
 //        }
+//        //返回ClassLoader
 //        return scl;
 //    }
 //
 //    private static synchronized void initSystemClassLoader() {
+//        //系统类加载器是否设置
 //        if (!sclSet) {
+//            //系统类加载器的引用
 //            if (scl != null)
 //                throw new IllegalStateException("recursive invocation");
+//            //返回lancher
 //            sun.misc.Launcher l = sun.misc.Launcher.getLauncher();
 //            if (l != null) {
 //                Throwable oops = null;
+//                //应用类加载器
 //                scl = l.getClassLoader();
 //                try {
+//                    //系统类加载器,
 //                    scl = AccessController.doPrivileged(
 //                        new SystemClassLoaderAction(scl));
 //                } catch (PrivilegedActionException pae) {
@@ -1193,6 +1153,7 @@
 //                    }
 //                }
 //            }
+//            //系统列加载器设置成功
 //            sclSet = true;
 //        }
 //    }
@@ -1257,8 +1218,9 @@
 //    // @GuardedBy("ClassLoader.class")
 //    private static ClassLoader scl;
 //
-//    // Set to true once the system class loader has been set
-//    // @GuardedBy("ClassLoader.class")
+//    /**
+//     * 系统列加载器是否设置
+//     */
 //    private static boolean sclSet;
 //
 //
@@ -1914,4 +1876,38 @@
 //    private static native AssertionStatusDirectives retrieveDirectives();
 //}
 //
+////该类在Classloader里面
+//class SystemClassLoaderAction
+//        implements PrivilegedExceptionAction<java.lang.ClassLoader> {
+//    private java.lang.ClassLoader parent;
 //
+//    SystemClassLoaderAction(java.lang.ClassLoader parent) {
+//        this.parent = parent;
+//    }
+//
+//    public java.lang.ClassLoader run() throws Exception {
+//        //获取属性java.system.class.loader
+//        String cls = System.getProperty("java.system.class.loader");
+//        if (cls == null) {
+//            //返回应用列加载器
+//            return parent;
+//        }
+//        //创建自定义的Classloader对象,自定义Classloader的父级为应用列加载器
+//        //Class.forName:通过给定的列加载器加载class
+//        //如果Classlaoder不存在,使用启动列加载器
+//        //true:代表是否要初始化。 下列两者等价
+//        //加载类并初始化。
+//         //Class.forName("Foo")}/
+//         // Class.forName("Foo", true, this.getClass().getClassLoader())}
+//        //系统列加载器
+//        Constructor<?> ctor = Class.forName(cls, true, parent)
+//                .getDeclaredConstructor(new Class<?>[] { java.lang.ClassLoader.class });
+//        //创建实力
+//        java.lang.ClassLoader sys = (java.lang.ClassLoader) ctor.newInstance(
+//                new Object[] { parent });
+//        Thread.currentThread().setContextClassLoader(sys);
+//        return sys;
+//    }
+//
+//
+//}

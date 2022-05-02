@@ -22,14 +22,10 @@ public class NameSpace1 {
         Class clazz2 = loader2.loadClass("Demo");
         //两个类加载器不可见。
         System.out.println(clazz1 == clazz2);
-        //loader1
         Object o1 = clazz1.newInstance();
-        //loader2
         Object o2 = clazz2.newInstance();
-        //app loader
-        Demo demo = new Demo();
-        System.out.println(demo.getClass().getClassLoader());
- 
+        Method method = clazz1.getMethod("hot", Demo.class);
+        method.invoke(o1,o2);
     }
     
 }
