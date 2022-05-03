@@ -890,18 +890,22 @@
 //    }
 //
 //    /**
-//     * Replaces all linked nodes in bin at index for given hash unless
-//     * table is too small, in which case resizes instead.
+//     *
 //     */
 //    final void treeifyBin(Node<K,V>[] tab, int hash) {
 //        int n, index; Node<K,V> e;
+//        //数组的容量<64,选择进行扩容。否则转红黑树。
 //        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
 //            resize();
 //        else if ((e = tab[index = (n - 1) & hash]) != null) {
+//            //数组上要转化的链表,e是链表的头结点
 //            TreeNode<K,V> hd = null, tl = null;
+//            //循环:遍历链表节点,转化为 treenode之做以后关联。
 //            do {
+//                //创建树,TreeNode<-entry<node，这里实际上市给node赋值。
 //                TreeNode<K,V> p = replacementTreeNode(e, null);
 //                if (tl == null)
+//                    //只会进来一次,赋值给hd
 //                    hd = p;
 //                else {
 //                    p.prev = tl;
@@ -910,30 +914,17 @@
 //                tl = p;
 //            } while ((e = e.next) != null);
 //            if ((tab[index] = hd) != null)
+//                //转化为红黑树。
 //                hd.treeify(tab);
 //        }
 //    }
 //
-//    /**
-//     * Copies all of the mappings from the specified map to this map.
-//     * These mappings will replace any mappings that this map had for
-//     * any of the keys currently in the specified map.
-//     *
-//     * @param m mappings to be stored in this map
-//     * @throws NullPointerException if the specified map is null
-//     */
 //    public void putAll(Map<? extends K, ? extends V> m) {
 //        putMapEntries(m, true);
 //    }
 //
 //    /**
-//     * Removes the mapping for the specified key from this map if present.
-//     *
-//     * @param  key key whose mapping is to be removed from the map
-//     * @return the previous value associated with <tt>key</tt>, or
-//     *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
-//     *         (A <tt>null</tt> return can also indicate that the map
-//     *         previously associated <tt>null</tt> with <tt>key</tt>.)
+//     * 删除一个节点,返回节点value。
 //     */
 //    public V remove(Object key) {
 //        Node<K,V> e;
@@ -941,29 +932,32 @@
 //            null : e.value;
 //    }
 //
-//    /**
-//     * Implements Map.remove and related methods
-//     *
-//     * @param hash hash for key
-//     * @param key the key
-//     * @param value the value to match if matchValue, else ignored
-//     * @param matchValue if true only remove if value is equal
-//     * @param movable if false do not move other nodes while removing
-//     * @return the node, or null if none
+//
+//    /**清除node
+//     * @param hash
+//     * @param key
+//     * @param value
+//     * @param matchValue value相同才会做清除
+//     * @param movable
+//     * @return
 //     */
 //    final Node<K,V> removeNode(int hash, Object key, Object value,
 //                               boolean matchValue, boolean movable) {
 //        Node<K,V>[] tab; Node<K,V> p; int n, index;
+//        //table[index = (n - 1) & hash]不等于空,并且将第一个元素赋给p
 //        if ((tab = table) != null && (n = tab.length) > 0 &&
 //            (p = tab[index = (n - 1) & hash]) != null) {
 //            Node<K,V> node = null, e; K k; V v;
+//            //判断节点是否相同。
 //            if (p.hash == hash &&
 //                ((k = p.key) == key || (key != null && key.equals(k))))
 //                node = p;
 //            else if ((e = p.next) != null) {
+//                //如果是红黑树,红黑树的父类是Node
 //                if (p instanceof TreeNode)
 //                    node = ((TreeNode<K,V>)p).getTreeNode(hash, key);
 //                else {
+//                    //链表结构,先do-while结构,前面已经判断了头元素一定会有元素,避免再次进入循环体。
 //                    do {
 //                        if (e.hash == hash &&
 //                            ((k = e.key) == key ||
@@ -975,13 +969,19 @@
 //                    } while ((e = e.next) != null);
 //                }
 //            }
+//            //node删减
+//            //1、node存在
+//            //2、如果matchValue==false,这里恒等于true
+//            //3、
 //            if (node != null && (!matchValue || (v = node.value) == value ||
 //                                 (value != null && value.equals(v)))) {
 //                if (node instanceof TreeNode)
 //                    ((TreeNode<K,V>)node).removeTreeNode(this, tab, movable);
 //                else if (node == p)
+//                    //链表头结点
 //                    tab[index] = node.next;
 //                else
+//                    //链表非头结点
 //                    p.next = node.next;
 //                ++modCount;
 //                --size;
@@ -993,8 +993,7 @@
 //    }
 //
 //    /**
-//     * Removes all of the mappings from this map.
-//     * The map will be empty after this call returns.
+//     * map清空
 //     */
 //    public void clear() {
 //        Node<K,V>[] tab;
@@ -1008,17 +1007,15 @@
 //    }
 //
 //    /**
-//     * Returns <tt>true</tt> if this map maps one or more keys to the
-//     * specified value.
-//     *
-//     * @param value value whose presence in this map is to be tested
-//     * @return <tt>true</tt> if this map maps one or more keys to the
-//     *         specified value
+//     * 是否包含value。
 //     */
 //    public boolean containsValue(Object value) {
 //        Node<K,V>[] tab; V v;
+//        //table!=null
 //        if ((tab = table) != null && size > 0) {
+//            //遍历table
 //            for (int i = 0; i < tab.length; ++i) {
+//                //遍历链表。直接是比对的链表,没有比对红黑树？
 //                for (Node<K,V> e = tab[i]; e != null; e = e.next) {
 //                    if ((v = e.value) == value ||
 //                        (value != null && value.equals(v)))
@@ -1030,19 +1027,9 @@
 //    }
 //
 //    /**
-//     * Returns a {@link Set} view of the keys contained in this map.
-//     * The set is backed by the map, so changes to the map are
-//     * reflected in the set, and vice-versa.  If the map is modified
-//     * while an iteration over the set is in progress (except through
-//     * the iterator's own <tt>remove</tt> operation), the results of
-//     * the iteration are undefined.  The set supports element removal,
-//     * which removes the corresponding mapping from the map, via the
-//     * <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
-//     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt>
-//     * operations.  It does not support the <tt>add</tt> or <tt>addAll</tt>
-//     * operations.
-//     *
-//     * @return a set view of the keys contained in this map
+//     *abstractMap中的ketset
+//     * hashmap中key的映射,.其实真正的keyset并不是实际意义的。keyset里面的元素
+//     * 其实都是对hashmap里面key的内存地址的一个映射。？
 //     */
 //    public Set<K> keySet() {
 //        Set<K> ks = keySet;
@@ -1191,28 +1178,53 @@
 //        }
 //    }
 //
-//    // Overrides of JDK8 Map extension methods
 //
+//    //map中的getOrDefault
+////    default V getOrDefault(Object key, V defaultValue) {
+////        V v;
+////        return (((v = get(key)) != null) || containsKey(key))
+////                ? v
+////                : defaultValue;
+////    }
+//    /**
+//     * hashmap对mapgetOrDefault中的进行重写
+//     */
 //    @Override
 //    public V getOrDefault(Object key, V defaultValue) {
 //        Node<K,V> e;
 //        return (e = getNode(hash(key), key)) == null ? defaultValue : e.value;
 //    }
 //
+//    /**
+//     * 如果key存在,并且value不等于null,不覆盖
+//     * 如果key存在,并且value等于null,覆盖
+//     * 如果key不存在,覆盖
+//     */
 //    @Override
 //    public V putIfAbsent(K key, V value) {
 //        return putVal(hash(key), key, value, true, true);
 //    }
 //
+//    /**
+//     * key和value 相同才会进行清除
+//     */
 //    @Override
 //    public boolean remove(Object key, Object value) {
 //        return removeNode(hash(key), key, value, true, true) != null;
 //    }
 //
+//    /**替换纸
+//     * @param key
+//     * @param oldValue 旧值
+//     * @param newValue 心智
+//     * @return
+//     */
 //    @Override
 //    public boolean replace(K key, V oldValue, V newValue) {
 //        Node<K,V> e; V v;
+//        //获取node
 //        if ((e = getNode(hash(key), key)) != null &&
+//                //旧值相等,替换
 //            ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
 //            e.value = newValue;
 //            afterNodeAccess(e);
@@ -1221,9 +1233,15 @@
 //        return false;
 //    }
 //
+//    /**替换纸
+//     * @param key
+//     * @param value 新值
+//     * @return
+//     */
 //    @Override
 //    public V replace(K key, V value) {
 //        Node<K,V> e;
+//        //获取节点
 //        if ((e = getNode(hash(key), key)) != null) {
 //            V oldValue = e.value;
 //            e.value = value;
@@ -1456,10 +1474,7 @@
 //    // Cloning and serialization
 //
 //    /**
-//     * Returns a shallow copy of this <tt>HashMap</tt> instance: the keys and
-//     * values themselves are not cloned.
-//     *
-//     * @return a shallow copy of this map
+//     * 浅拷贝
 //     */
 //    @SuppressWarnings("unchecked")
 //    @Override
@@ -1471,12 +1486,13 @@
 //            // this shouldn't happen, since we are Cloneable
 //            throw new InternalError(e);
 //        }
+//        //重置map
 //        result.reinitialize();
+//        //设置map.
 //        result.putMapEntries(this, false);
 //        return result;
 //    }
 //
-//    // These methods are also used when serializing HashSets
 //    final float loadFactor() { return loadFactor; }
 //    final int capacity() {
 //        return (table != null) ? table.length :
@@ -1485,20 +1501,11 @@
 //    }
 //
 //    /**
-//     * Save the state of the <tt>HashMap</tt> instance to a stream (i.e.,
-//     * serialize it).
-//     *
-//     * @serialData The <i>capacity</i> of the HashMap (the length of the
-//     *             bucket array) is emitted (int), followed by the
-//     *             <i>size</i> (an int, the number of key-value
-//     *             mappings), followed by the key (Object) and value (Object)
-//     *             for each key-value mapping.  The key-value mappings are
-//     *             emitted in no particular order.
+//     * 序列化
 //     */
 //    private void writeObject(java.io.ObjectOutputStream s)
 //        throws IOException {
 //        int buckets = capacity();
-//        // Write out the threshold, loadfactor, and any hidden stuff
 //        s.defaultWriteObject();
 //        s.writeInt(buckets);
 //        s.writeInt(size);
@@ -1506,8 +1513,7 @@
 //    }
 //
 //    /**
-//     * Reconstitute the {@code HashMap} instance from a stream (i.e.,
-//     * deserialize it).
+//     * 反序列化
 //     */
 //    private void readObject(java.io.ObjectInputStream s)
 //        throws IOException, ClassNotFoundException {
@@ -1917,7 +1923,7 @@
 //        size = 0;
 //    }
 //
-//    // Callbacks to allow LinkedHashMap post-actions
+//    // linkedhashmap拓展使用
 //    void afterNodeAccess(Node<K,V> p) { }
 //    void afterNodeInsertion(boolean evict) { }
 //    void afterNodeRemoval(Node<K,V> p) { }

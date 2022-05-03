@@ -1,6 +1,7 @@
 package com.padingpading.interview.collection.b_hashmap;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author libin
@@ -10,8 +11,8 @@ import java.util.HashMap;
 public class Test {
     
     public static void main(String[] args) {
-    
-        HashMap hashMap = new HashMap();
+        Map hashMap = new HashMap();
+        hashMap.put("","");
     }
     
 }
