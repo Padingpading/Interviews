@@ -52,249 +52,43 @@
 //import java.util.function.Consumer;
 //import java.util.function.Function;
 //
-///**
-// * Hash table based implementation of the <tt>Map</tt> interface.  This
-// * implementation provides all of the optional map operations, and permits
-// * <tt>null</tt> values and the <tt>null</tt> key.  (The <tt>HashMap</tt>
-// * class is roughly equivalent to <tt>Hashtable</tt>, except that it is
-// * unsynchronized and permits nulls.)  This class makes no guarantees as to
-// * the order of the map; in particular, it does not guarantee that the order
-// * will remain constant over time.
-// *
-// * <p>This implementation provides constant-time performance for the basic
-// * operations (<tt>get</tt> and <tt>put</tt>), assuming the hash function
-// * disperses the elements properly among the buckets.  Iteration over
-// * collection views requires time proportional to the "capacity" of the
-// * <tt>HashMap</tt> instance (the number of buckets) plus its size (the number
-// * of key-value mappings).  Thus, it's very important not to set the initial
-// * capacity too high (or the load factor too low) if iteration performance is
-// * important.
-// *
-// * <p>An instance of <tt>HashMap</tt> has two parameters that affect its
-// * performance: <i>initial capacity</i> and <i>load factor</i>.  The
-// * <i>capacity</i> is the number of buckets in the hash table, and the initial
-// * capacity is simply the capacity at the time the hash table is created.  The
-// * <i>load factor</i> is a measure of how full the hash table is allowed to
-// * get before its capacity is automatically increased.  When the number of
-// * entries in the hash table exceeds the product of the load factor and the
-// * current capacity, the hash table is <i>rehashed</i> (that is, internal data
-// * structures are rebuilt) so that the hash table has approximately twice the
-// * number of buckets.
-// *
-// * <p>As a general rule, the default load factor (.75) offers a good
-// * tradeoff between time and space costs.  Higher values decrease the
-// * space overhead but increase the lookup cost (reflected in most of
-// * the operations of the <tt>HashMap</tt> class, including
-// * <tt>get</tt> and <tt>put</tt>).  The expected number of entries in
-// * the map and its load factor should be taken into account when
-// * setting its initial capacity, so as to minimize the number of
-// * rehash operations.  If the initial capacity is greater than the
-// * maximum number of entries divided by the load factor, no rehash
-// * operations will ever occur.
-// *
-// * <p>If many mappings are to be stored in a <tt>HashMap</tt>
-// * instance, creating it with a sufficiently large capacity will allow
-// * the mappings to be stored more efficiently than letting it perform
-// * automatic rehashing as needed to grow the table.  Note that using
-// * many keys with the same {@code hashCode()} is a sure way to slow
-// * down performance of any hash table. To ameliorate impact, when keys
-// * are {@link Comparable}, this class may use comparison order among
-// * keys to help break ties.
-// *
-// * <p><strong>Note that this implementation is not synchronized.</strong>
-// * If multiple threads access a hash map concurrently, and at least one of
-// * the threads modifies the map structurally, it <i>must</i> be
-// * synchronized externally.  (A structural modification is any operation
-// * that adds or deletes one or more mappings; merely changing the value
-// * associated with a key that an instance already contains is not a
-// * structural modification.)  This is typically accomplished by
-// * synchronizing on some object that naturally encapsulates the map.
-// *
-// * If no such object exists, the map should be "wrapped" using the
-// * {@link Collections#synchronizedMap Collections.synchronizedMap}
-// * method.  This is best done at creation time, to prevent accidental
-// * unsynchronized access to the map:<pre>
-// *   Map m = Collections.synchronizedMap(new HashMap(...));</pre>
-// *
-// * <p>The iterators returned by all of this class's "collection view methods"
-// * are <i>fail-fast</i>: if the map is structurally modified at any time after
-// * the iterator is created, in any way except through the iterator's own
-// * <tt>remove</tt> method, the iterator will throw a
-// * {@link ConcurrentModificationException}.  Thus, in the face of concurrent
-// * modification, the iterator fails quickly and cleanly, rather than risking
-// * arbitrary, non-deterministic behavior at an undetermined time in the
-// * future.
-// *
-// * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
-// * as it is, generally speaking, impossible to make any hard guarantees in the
-// * presence of unsynchronized concurrent modification.  Fail-fast iterators
-// * throw <tt>ConcurrentModificationException</tt> on a best-effort basis.
-// * Therefore, it would be wrong to write a program that depended on this
-// * exception for its correctness: <i>the fail-fast behavior of iterators
-// * should be used only to detect bugs.</i>
-// *
-// * <p>This class is a member of the
-// * <a href="{@docRoot}/../technotes/guides/collections/index.html">
-// * Java Collections Framework</a>.
-// *
-// * @param <K> the type of keys maintained by this map
-// * @param <V> the type of mapped values
-// *
-// * @author  Doug Lea
-// * @author  Josh Bloch
-// * @author  Arthur van Hoff
-// * @author  Neal Gafter
-// * @see     Object#hashCode()
-// * @see     Collection
-// * @see     Map
-// * @see     TreeMap
-// * @see     Hashtable
-// * @since   1.2
-// */
+//
 //public class HashMap<K,V> extends AbstractMap<K,V>
 //    implements Map<K,V>, Cloneable, Serializable {
 //    //序列化号,文件版本。
 //    private static final long serialVersionUID = 362498820763181265L;
 //
-//    /*
-//     * Implementation notes.
-//     *
-//     * This map usually acts as a binned (bucketed) hash table, but
-//     * when bins get too large, they are transformed into bins of
-//     * TreeNodes, each structured similarly to those in
-//     * java.util.TreeMap. Most methods try to use normal bins, but
-//     * relay to TreeNode methods when applicable (simply by checking
-//     * instanceof a node).  Bins of TreeNodes may be traversed and
-//     * used like any others, but additionally support faster lookup
-//     * when overpopulated. However, since the vast majority of bins in
-//     * normal use are not overpopulated, checking for existence of
-//     * tree bins may be delayed in the course of table methods.
-//     *
-//     * Tree bins (i.e., bins whose elements are all TreeNodes) are
-//     * ordered primarily by hashCode, but in the case of ties, if two
-//     * elements are of the same "class C implements Comparable<C>",
-//     * type then their compareTo method is used for ordering. (We
-//     * conservatively check generic types via reflection to validate
-//     * this -- see method comparableClassFor).  The added complexity
-//     * of tree bins is worthwhile in providing worst-case O(log n)
-//     * operations when keys either have distinct hashes or are
-//     * orderable, Thus, performance degrades gracefully under
-//     * accidental or malicious usages in which hashCode() methods
-//     * return values that are poorly distributed, as well as those in
-//     * which many keys share a hashCode, so long as they are also
-//     * Comparable. (If neither of these apply, we may waste about a
-//     * factor of two in time and space compared to taking no
-//     * precautions. But the only known cases stem from poor user
-//     * programming practices that are already so slow that this makes
-//     * little difference.)
-//     *
-//     * Because TreeNodes are about twice the size of regular nodes, we
-//     * use them only when bins contain enough nodes to warrant use
-//     * (see TREEIFY_THRESHOLD). And when they become too small (due to
-//     * removal or resizing) they are converted back to plain bins.  In
-//     * usages with well-distributed user hashCodes, tree bins are
-//     * rarely used.  Ideally, under random hashCodes, the frequency of
-//     * nodes in bins follows a Poisson distribution
-//     * (http://en.wikipedia.org/wiki/Poisson_distribution) with a
-//     * parameter of about 0.5 on average for the default resizing
-//     * threshold of 0.75, although with a large variance because of
-//     * resizing granularity. Ignoring variance, the expected
-//     * occurrences of list size k are (exp(-0.5) * pow(0.5, k) /
-//     * factorial(k)). The first values are:
-//     *
-//     * 0:    0.60653066
-//     * 1:    0.30326533
-//     * 2:    0.07581633
-//     * 3:    0.01263606
-//     * 4:    0.00157952
-//     * 5:    0.00015795
-//     * 6:    0.00001316
-//     * 7:    0.00000094
-//     * 8:    0.00000006
-//     * more: less than 1 in ten million
-//     *
-//     * The root of a tree bin is normally its first node.  However,
-//     * sometimes (currently only upon Iterator.remove), the root might
-//     * be elsewhere, but can be recovered following parent links
-//     * (method TreeNode.root()).
-//     *
-//     * All applicable internal methods accept a hash code as an
-//     * argument (as normally supplied from a public method), allowing
-//     * them to call each other without recomputing user hashCodes.
-//     * Most internal methods also accept a "tab" argument, that is
-//     * normally the current table, but may be a new or old one when
-//     * resizing or converting.
-//     *
-//     * When bin lists are treeified, split, or untreeified, we keep
-//     * them in the same relative access/traversal order (i.e., field
-//     * Node.next) to better preserve locality, and to slightly
-//     * simplify handling of splits and traversals that invoke
-//     * iterator.remove. When using comparators on insertion, to keep a
-//     * total ordering (or as close as is required here) across
-//     * rebalancings, we compare classes and identityHashCodes as
-//     * tie-breakers.
-//     *
-//     * The use and transitions among plain vs tree modes is
-//     * complicated by the existence of subclass LinkedHashMap. See
-//     * below for hook methods defined to be invoked upon insertion,
-//     * removal and access that allow LinkedHashMap internals to
-//     * otherwise remain independent of these mechanics. (This also
-//     * requires that a map instance be passed to some utility methods
-//     * that may create new nodes.)
-//     *
-//     * The concurrent-programming-like SSA-based coding style helps
-//     * avoid aliasing errors amid all of the twisty pointer operations.
-//     */
 //
-//    /**默认初始化大小
-//     * The default initial capacity - MUST be a power of two.
+//    /**
+//     * 默认的table初始容量16
 //     */
 //    static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
 //
-//    /**
-//     * The maximum capacity, used if a higher value is implicitly specified
-//     * by either of the constructors with arguments.
-//     * MUST be a power of two <= 1<<30.
-//     */
 //    //2的30次
 //    //2的31次  需要8位存储数组的长度。
 //    //2的31次-8 不符合map的扩容原理。
 //    static final int MAXIMUM_CAPACITY = 1 << 30;
 //
-//    /**3/4 当存储的元素>容器的大小*0.75 ,则进行扩容
-//     * The load factor used when none specified in constructor.
+//    /**默认的负载因子
+//     * 当存储的元素>容器的大小*0.75 ,则进行扩容
 //     */
 //    static final float DEFAULT_LOAD_FACTOR = 0.75f;
 //
 //    /**table的长度>64，并且链表长度>8，会转为红黑树。
-//     * The bin count threshold for using a tree rather than list for a
-//     * bin.  Bins are converted to trees when adding an element to a
-//     * bin with at least this many nodes. The value must be greater
-//     * than 2 and should be at least 8 to mesh with assumptions in
-//     * tree removal about conversion back to plain bins upon
-//     * shrinkage.
 //     */
 //    static final int TREEIFY_THRESHOLD = 8;
 //    //为什么等于6才会转为链表。删减两个元素之后
 //    //7个元素的红黑树,是一个而平衡二叉树,强制解体，失去了它的平衡性。
 //    /**红黑树转为链表的阈值, 红黑树长度<6，红黑树转为链表。
-//     * The bin count threshold for untreeifying a (split) bin during a
-//     * resize operation. Should be less than TREEIFY_THRESHOLD, and at
-//     * most 6 to mesh with shrinkage detection under removal.
 //     */
 //    static final int UNTREEIFY_THRESHOLD = 6;
 //
 //    /**最小扩容大小。
-//     * The smallest table capacity for which bins may be treeified.
-//     * (Otherwise the table is resized if too many nodes in a bin.)
-//     * Should be at least 4 * TREEIFY_THRESHOLD to avoid conflicts
-//     * between resizing and treeification thresholds.
 //     */
 //    static final int MIN_TREEIFY_CAPACITY = 64;
 //
 //    /**
-//     * Basic hash bin node, used for most entries.  (See below for
-//     * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
+//     * 容器数组
 //     */
 //    static class Node<K,V> implements Entry<K,V> {
 //        //key的hash,对象的hash生成后是一定的
@@ -349,25 +143,13 @@
 //        }
 //    }
 //
-//    /* ---------------- Static utilities -------------- */
-//
-//    /**
-//     * Computes key.hashCode() and spreads (XORs) higher bits of hash
-//     * to lower.  Because the table uses power-of-two masking, sets of
-//     * hashes that vary only in bits above the current mask will
-//     * always collide. (Among known examples are sets of Float keys
-//     * holding consecutive whole numbers in small tables.)  So we
-//     * apply a transform that spreads the impact of higher bits
-//     * downward. There is a tradeoff between speed, utility, and
-//     * quality of bit-spreading. Because many common sets of hashes
-//     * are already reasonably distributed (so don't benefit from
-//     * spreading), and because we use trees to handle large sets of
-//     * collisions in bins, we just XOR some shifted bits in the
-//     * cheapest possible way to reduce systematic lossage, as well as
-//     * to incorporate impact of the highest bits that would otherwise
-//     * never be used in index calculations because of table bounds.
+//    /**计算hash值
+//     *如果key=null hash = 0,元素i = (n - 1) & hash =  0 ,永远在数组arr[0]的位置
+//     *如果key！=null  扰动处理: hashCode 异或 hashcode >>> 16
+//     * int hash = 4 * 8 = 32位 大约有21亿长度,
+//     * 高16位异或低16位,避免有些hash函数得到的后table-1位全部为0.避免了hash碰撞
 //     */
-//    //put对重的hahs入参,hash>右移16位?
+//    /* ---------------- Static utilities -------------- */
 //    static final int hash(Object key) {
 //        int h;
 //        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
@@ -447,36 +229,21 @@
 //     */
 //    transient Set<Entry<K,V>> entrySet;
 //
-//    /**元素的额数量
+//    /**当前hashmap包含的键值对的数量
 //     * The number of key-value mappings contained in this map.
 //     */
 //    transient int size;
 //
 //    /**
-//     * The number of times this HashMap has been structurally modified
-//     * Structural modifications are those that change the number of mappings in
-//     * the HashMap or otherwise modify its internal structure (e.g.,
-//     * rehash).  This field is used to make iterators on Collection-views of
-//     * the HashMap fail-fast.  (See ConcurrentModificationException).
+//     * 当前hashmap修改的次数
 //     */
 //    transient int modCount;
 //
-//    /**
-//     * The next size value at which to resize (capacity * load factor).
-//     *
-//     * @serial
-//     */
-//    // (The javadoc description is true upon serialization.
-//    // Additionally, if the table array has not been allocated, this
-//    // field holds the initial array capacity, or zero signifying
-//    // DEFAULT_INITIAL_CAPACITY.)
-//    //node数组长度。
+//    //当前hashmap才能称号搜的最多键值对数量,一旦超过这个数量hashmap就会扩容。
 //    int threshold;
 //
-//    /**加载因子
-//     * The load factor for the hash table.
-//     *
-//     * @serial
+//    /**
+//     * 负载因子,用于扩容
 //     */
 //    final float loadFactor;
 //
@@ -709,7 +476,7 @@
 //        if ((tab = table) == null || (n = tab.length) == 0)
 //            //扩容后的长度赋值给n
 //            n = (tab = resize()).length;
-//        //定位到key的槽位 为null,说明没有数据
+//        //定位到key的槽位 为null,说明没有数据  (n - 1) & hash 相当于取模
 //        if ((p = tab[i = (n - 1) & hash]) == null)
 //            //创建node复制到槽位。
 //            tab[i] = newNode(hash, key, value, null);
@@ -803,7 +570,7 @@
 //            // zero initial threshold signifies using defaults
 //            //新容器的大小16
 //            newCap = DEFAULT_INITIAL_CAPACITY;
-//            //新的阈值大小=16*0.75
+//            //新的阈值大小=16*0.75=12
 //            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
 //        }
 //        if (newThr == 0) {

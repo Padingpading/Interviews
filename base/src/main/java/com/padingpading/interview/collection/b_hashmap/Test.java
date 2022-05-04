@@ -8,11 +8,12 @@ import java.util.Map;
  * @description
  * @date 2022-04-27
  */
-public class Test {
-    
+public final  class Test {
+    int i;
     public static void main(String[] args) {
         Map hashMap = new HashMap();
         hashMap.put("","");
+        System.out.println("sdf".hashCode());
     }
     
 }
