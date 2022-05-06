@@ -1,10 +1,9 @@
-package com.padingpading.interview.thread.wangwenjun.thread.execption;
+package com.padingpading.interview.thread.wangwenjun.thread.caughtException;
 
 /**
  * java 线程异常的捕捉
  */
 public class ThreadException {
-
     private final static int A = 10;
 
     private final static int B = 0;
@@ -23,6 +22,8 @@ public class ThreadException {
         t.setUncaughtExceptionHandler((thread, e) -> {
             System.out.println(e);
             System.out.println(thread);
+//           java.lang.ArithmeticException: / by zero
+//           Thread[Thread-0,5,main]
         });
         System.out.println("dfdsfd");
     }

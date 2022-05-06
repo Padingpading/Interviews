@@ -1,13 +1,8 @@
 package com.padingpading.interview.thread.wangwenjun.thread.deadlock;
 
-/**
- * @author libin
- * @description
- * @date 2021-07-16
+/**死锁
  */
-public class MyDeadLock
-{
-
+public class MyDeadLock {
     public static void main(String[] args) {
         Object o1 = new Object();
         Object o2 = new Object();
@@ -23,7 +18,7 @@ public class MyDeadLock
                 }
             }
         });
-
+        
         Thread t2 = new Thread(() -> {
             synchronized (o2) {
                 try {
