@@ -5,7 +5,7 @@ package com.padingpading.interview.jvm.stack;
  * @description
  * @date 2021-07-06
  */
-public class StackFrameTest {
+public class A_StackDeep {
     public static void main(String[] args) {
         method01();
     }
