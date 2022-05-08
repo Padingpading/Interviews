@@ -97,7 +97,8 @@
 //
 //
 //    /**
-//     * 父线程的threadlocal
+//     * 父线程的 threadlocal
+//     * 能够让子线程使用父线程的 threadlocal
 //     */
 //    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
 //
@@ -251,6 +252,12 @@
 //    }
 //
 //    /**
+//     * @param g
+//     * @param target 任务
+//     * @param name 线程名字
+//     * @param stackSize 栈深度
+//     * @param acc
+//     * @param inheritThreadLocals 是否继承父线程的 ThreadLocals
 //     */
 //    private void init(ThreadGroup g, Runnable target, String name,
 //                      long stackSize, AccessControlContext acc,
@@ -312,8 +319,9 @@
 //        //设置线程优先级
 //        setPriority(priority);
 //
-//        //todo Threadlocal?
+//        //父线程的threadlocal不为空。
 //        if (inheritThreadLocals && parent.inheritableThreadLocals != null)
+//            //获取父线程的Treadlocals
 //            this.inheritableThreadLocals =
 //                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
 //

@@ -75,11 +75,12 @@ public class ThreadLocal<T> {
     public ThreadLocal() {
     }
 
-    /**Threadlocal
-     * 当前线程的value。
+    /** 从map中获取值。
+     * 。
      */
     public T get() {
         Thread t = Thread.currentThread();
+        //获取数组
         ThreadLocalMap map = getMap(t);
         if (map != null) {
             ThreadLocalMap.Entry e = map.getEntry(this);
@@ -284,48 +285,41 @@ public class ThreadLocal<T> {
             }
         }
 
-        /**
-         * Get the entry associated with key.  This method
-         * itself handles only the fast path: a direct hit of existing
-         * key. It otherwise relays to getEntryAfterMiss.  This is
-         * designed to maximize performance for direct hits, in part
-         * by making this method readily inlinable.
-         *
-         * @param  key the thread local object
-         * @return the entry associated with key, or null if no such
+        /**查询entry
          */
         private Entry getEntry(ThreadLocal<?> key) {
+            //计算索引位置
             int i = key.threadLocalHashCode & (table.length - 1);
+            //获取元素
             Entry e = table[i];
             if (e != null && e.get() == key)
+                //正好在,key值相同,返回
                 return e;
             else
                 return getEntryAfterMiss(key, i, e);
         }
 
-        /**
-         * Version of getEntry method for use when key is not found in
-         * its direct hash slot.
-         *
-         * @param  key the thread local object
-         * @param  i the table index for key's hash code
-         * @param  e the entry at table[i]
-         * @return the entry associated with key, or null if no such
+        /**从entry,向后查询key值相同的。
          */
         private Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
             Entry[] tab = table;
             int len = tab.length;
-
+            
+            //遍历到entry=null停止。
             while (e != null) {
+                //遍历过程中找到key值相同的。
                 ThreadLocal<?> k = e.get();
                 if (k == key)
                     return e;
                 if (k == null)
+                    //entry过期了,进行探测清理,会对后面的元素进行rehash。
                     expungeStaleEntry(i);
                 else
+                    //下一个元素赋值。
                     i = nextIndex(i, len);
                 e = tab[i];
             }
+            //没有找到,返回null.
             return null;
         }
 
@@ -445,9 +439,15 @@ public class ThreadLocal<T> {
         }
 
         /**探测式清理
+         * 探测式清理: expungeStaleEntry(index n)从slotToExpunge位置开始探测清理。
+         * 1、	清除slotToExpunge的entry,因为该位置的元素已经被是过期的了。
+         * 2、	向后遍历元素,直到entry!=null
+         *      1、	如果entry的key等于null,说明过去,直接清除。
+         *      2、	Entry存在,进行rehash,判断rehash的位置是否存在entry,如果存在,向后遍历,直到为当前位置。
+         * 3、返回entry为null的位置。
          */
         private int expungeStaleEntry(int staleSlot) {
-            //staleSlot 位置开始为过期远古三。
+            //staleSlot 位置开始为过期元素。
             Entry[] tab = table;
             int len = tab.length;
 
@@ -480,32 +480,13 @@ public class ThreadLocal<T> {
                     }
                 }
             }
+            //i为entry为null的位置
             return i;
         }
 
-        /**
-         * Heuristically scan some cells looking for stale entries.
-         * This is invoked when either a new element is added, or
-         * another stale one has been expunged. It performs a
-         * logarithmic number of scans, as a balance between no
-         * scanning (fast but retains garbage) and a number of scans
-         * proportional to number of elements, that would find all
-         * garbage but would cause some insertions to take O(n) time.
-         *
-         * @param i a position known NOT to hold a stale entry. The
-         * scan starts at the element after i.
-         *
-         * @param n scan control: {@code log2(n)} cells are scanned,
-         * unless a stale entry is found, in which case
-         * {@code log2(table.length)-1} additional cells are scanned.
-         * When called from insertions, this parameter is the number
-         * of elements, but when from replaceStaleEntry, it is the
-         * table length. (Note: all this could be changed to be either
-         * more or less aggressive by weighting n instead of just
-         * using straight log n. But this version is simple, fast, and
-         * seems to work well.)
-         *
-         * @return true if any stale entries have been removed.
+        /**启发式清理
+         * i:
+         * n:
          */
         private boolean cleanSomeSlots(int i, int n) {
             boolean removed = false;
@@ -517,6 +498,7 @@ public class ThreadLocal<T> {
                 if (e != null && e.get() == null) {
                     n = len;
                     removed = true;
+                    //探测式清理
                     i = expungeStaleEntry(i);
                 }
             } while ( (n >>>= 1) != 0);
@@ -526,11 +508,11 @@ public class ThreadLocal<T> {
         /**扩容
          */
         private void rehash() {
-            //rehash()中会先进行一轮探测式清理，清理过期key，清理完成后如果size >= threshold - threshold / 4，就会执行真正的扩容逻辑(扩容逻辑往后看)
+            //rehash()中会先进行一轮探测式清理，清理过期key，
             expungeStaleEntries();
-
-            // Use lower threshold for doubling to avoid hysteresis
+            //清理完成后如果size >= threshold - threshold / 4，就会执行真正的扩容逻辑(扩容逻辑往后看)
             if (size >= threshold - threshold / 4)
+                //扩容
                 resize();
         }
 
@@ -541,19 +523,24 @@ public class ThreadLocal<T> {
             Entry[] oldTab = table;
             int oldLen = oldTab.length;
             int newLen = oldLen * 2;
+            //创建新的数组
             Entry[] newTab = new Entry[newLen];
             int count = 0;
-
+            //遍历老数组
             for (int j = 0; j < oldLen; ++j) {
                 Entry e = oldTab[j];
                 if (e != null) {
-                    ThreadLocal<?> k = e.get();
+                    ThreadLocal<?> k  = e.get();
+                    //获取key快速gc
                     if (k == null) {
                         e.value = null; // Help the GC
                     } else {
+                        //rehash
                         int h = k.threadLocalHashCode & (newLen - 1);
+                        //向后遍历
                         while (newTab[h] != null)
                             h = nextIndex(h, newLen);
+                        //赋值
                         newTab[h] = e;
                         count++;
                     }
@@ -565,15 +552,17 @@ public class ThreadLocal<T> {
             table = newTab;
         }
 
-        /**
-         * Expunge all stale entries in the table.
+        /**遍历整个table进行探测式,清理
          */
         private void expungeStaleEntries() {
             Entry[] tab = table;
             int len = tab.length;
+            //遍历table
             for (int j = 0; j < len; j++) {
                 Entry e = tab[j];
+                //entry过期。
                 if (e != null && e.get() == null)
+                    //指定位置开始向后探测。
                     expungeStaleEntry(j);
             }
         }
