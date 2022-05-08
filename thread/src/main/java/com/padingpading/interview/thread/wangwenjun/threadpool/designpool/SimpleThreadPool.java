@@ -1,4 +1,4 @@
-package com.padingpading.interview.thread.wangwenjun.designpool;
+package com.padingpading.interview.thread.wangwenjun.threadpool.designpool;
 
 import java.util.ArrayList;
 import java.util.Iterator;
