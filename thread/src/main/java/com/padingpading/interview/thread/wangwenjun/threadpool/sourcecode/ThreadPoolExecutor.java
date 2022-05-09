@@ -62,9 +62,9 @@
 //import java.util.concurrent.locks.ReentrantLock;
 //
 ///**
-// * Executor
-// * ExecutorService
-// * AbstractExecutorService
+// * Executor:任务提交
+// * ExecutorService:提供了处理任务的方法
+// * AbstractExecutorService:任务处理的方法
 // * ThreadPoolExecutor
 // */
 //public class ThreadPoolExecutor extends AbstractExecutorService {
