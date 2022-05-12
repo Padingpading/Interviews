@@ -112,6 +112,7 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
         /**排他锁的释放
          * 非公平和公平锁的释放没有区别。
          */
+        @Override
         protected final boolean tryRelease(int releases) {
             // 首先将当前持有锁的线程个数减1(回溯到调用源头sync.release(1)可知, releases的值为1)
             // 这里的操作主要是针对可重入锁的情况下, c可能大于1
@@ -135,6 +136,7 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
     
         /**是否是独占
          */
+        @Override
         protected final boolean isHeldExclusively() {
             return getExclusiveOwnerThread() == Thread.currentThread();
         }
@@ -175,6 +177,7 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
          * 1、第一次获取锁,不管有没有等待的线程,直接去抢。
          * 2、
          */
+        @Override
         final void lock() {
             //尝试争抢锁,争抢失败,添加到阻塞队列。
             if (compareAndSetState(0, 1))
@@ -182,7 +185,7 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
             else
                 acquire(1);
         }
-
+        @Override
         protected final boolean tryAcquire(int acquires) {
             return nonfairTryAcquire(acquires);
         }
@@ -235,27 +238,28 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
             return false;
         }
     }
-
-
-    /**获取所
+    
+    
+    /**获取锁
      */
     public void lock() {
         sync.lock();
     }
 
-    /**
+    /**可中断获取锁。
      */
     public void lockInterruptibly() throws InterruptedException {
         sync.acquireInterruptibly(1);
     }
 
-    /**
+    /**尝试获取锁
+     * 获取不到锁,返回false。
      */
     public boolean tryLock() {
         return sync.nonfairTryAcquire(1);
     }
 
-    /**
+    /**基于时间的尝试获取锁。
      */
     public boolean tryLock(long timeout, TimeUnit unit)
             throws InterruptedException {
@@ -269,8 +273,8 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
         sync.release(1);
     }
 
-    /**
-   
+    /**创建条件对象。
+     *
      */
     public Condition newCondition() {
         return sync.newCondition();
@@ -296,23 +300,24 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
     protected Thread getOwner() {
         return sync.getOwner();
     }
-
-    /**
+    
+    /*==================================================同步队列=========================================================*/
+    
+    /**同步队列是否有及诶单。
    
      */
     public final boolean hasQueuedThreads() {
         return sync.hasQueuedThreads();
     }
 
-    /**
+    /**队列中是否含有当前线程
    
      */
     public final boolean hasQueuedThread(Thread thread) {
         return sync.isQueued(thread);
     }
 
-    /**
-  
+    /**同步队列长度。
      */
     public final int getQueueLength() {
         return sync.getQueueLength();
@@ -324,8 +329,11 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
     protected Collection<Thread> getQueuedThreads() {
         return sync.getQueuedThreads();
     }
+    
+    
+    /*==================================================条件队列=========================================================*/
 
-    /**
+    /**条件队列是否有节点。
     
      */
     public boolean hasWaiters(Condition condition) {
@@ -335,9 +343,9 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
             throw new IllegalArgumentException("not owner");
         return sync.hasWaiters((AbstractQueuedSynchronizer.ConditionObject)condition);
     }
-
-    /**
-   
+    
+    /**条件队列长度。。
+     
      */
     public int getWaitQueueLength(Condition condition) {
         if (condition == null)
@@ -347,7 +355,7 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
         return sync.getWaitQueueLength((AbstractQueuedSynchronizer.ConditionObject)condition);
     }
 
-    /**
+    /**获取条件队列的线程
    
      */
     protected Collection<Thread> getWaitingThreads(Condition condition) {
@@ -358,6 +366,10 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
         return sync.getWaitingThreads((AbstractQueuedSynchronizer.ConditionObject)condition);
     }
 
+    /*========================================================普通方法=================================================*/
+    
+    
+    
     /**
     
      */

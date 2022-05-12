@@ -286,7 +286,6 @@ public abstract class AbstractQueuedSynchronizer
      * @param node the node
      */
     private void cancelAcquire(Node node) {
-        // Ignore if node doesn't exist
         if (node == null)
             return;
 
@@ -395,6 +394,7 @@ public abstract class AbstractQueuedSynchronizer
                     interrupted = true;
             }
         } finally {
+            //跳出for循环并不一定是拿到了锁，也可能是tryAcquire(arg)抛出了异常，因为是子类重写tryAcquire(arg)，我们并不知道子类如何去实现他，一旦子类获取锁抛出异常，就必须要走finally的cancelAcquire(node);方法，将本身节点从同步队列中移除。
             if (failed)
                 cancelAcquire(node);
         }
@@ -761,17 +761,9 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     // Queue inspection methods
+    /*==================================================同步队列方法===========================================================*/
 
-    /**
-     * Queries whether any threads are waiting to acquire. Note that
-     * because cancellations due to interrupts and timeouts may occur
-     * at any time, a {@code true} return does not guarantee that any
-     * other thread will ever acquire.
-     *
-     * <p>In this implementation, this operation returns in
-     * constant time.
-     *
-     * @return {@code true} if there may be other threads waiting to acquire
+    /**队列是否有节点
      */
     public final boolean hasQueuedThreads() {
         return head != tail;
@@ -845,15 +837,7 @@ public abstract class AbstractQueuedSynchronizer
         return firstThread;
     }
 
-    /**
-     * Returns true if the given thread is currently queued.
-     *
-     * <p>This implementation traverses the queue to determine
-     * presence of the given thread.
-     *
-     * @param thread the thread
-     * @return {@code true} if the given thread is on the queue
-     * @throws NullPointerException if the thread is null
+    /**线程是否在同步队列中。
      */
     public final boolean isQueued(Thread thread) {
         if (thread == null)
@@ -889,6 +873,8 @@ public abstract class AbstractQueuedSynchronizer
         Node t = tail; // Read fields in reverse initialization order
         Node h = head;
         Node s;
+        //h != t 队列不为空
+        //(s = h.next) == null || s.thread != Thread.currentThread():头结点后继节点存在,并且不是
         return h != t &&
             ((s = h.next) == null || s.thread != Thread.currentThread());
     }
@@ -896,15 +882,7 @@ public abstract class AbstractQueuedSynchronizer
 
     // Instrumentation and monitoring methods
 
-    /**
-     * Returns an estimate of the number of threads waiting to
-     * acquire.  The value is only an estimate because the number of
-     * threads may change dynamically while this method traverses
-     * internal data structures.  This method is designed for use in
-     * monitoring system state, not for synchronization
-     * control.
-     *
-     * @return the estimated number of threads waiting to acquire
+    /**同步队列的长度。
      */
     public final int getQueueLength() {
         int n = 0;
@@ -915,16 +893,7 @@ public abstract class AbstractQueuedSynchronizer
         return n;
     }
 
-    /**
-     * Returns a collection containing threads that may be waiting to
-     * acquire.  Because the actual set of threads may change
-     * dynamically while constructing this result, the returned
-     * collection is only a best-effort estimate.  The elements of the
-     * returned collection are in no particular order.  This method is
-     * designed to facilitate construction of subclasses that provide
-     * more extensive monitoring facilities.
-     *
-     * @return the collection of threads
+    /**获取同步队列中所有的线程。
      */
     public final Collection<Thread> getQueuedThreads() {
         ArrayList<Thread> list = new ArrayList<Thread>();
@@ -1083,21 +1052,7 @@ public abstract class AbstractQueuedSynchronizer
         return condition.isOwnedBy(this);
     }
 
-    /**
-     * Queries whether any threads are waiting on the given condition
-     * associated with this synchronizer. Note that because timeouts
-     * and interrupts may occur at any time, a {@code true} return
-     * does not guarantee that a future {@code signal} will awaken
-     * any threads.  This method is designed primarily for use in
-     * monitoring of the system state.
-     *
-     * @param condition the condition
-     * @return {@code true} if there are any waiting threads
-     * @throws IllegalMonitorStateException if exclusive synchronization
-     *         is not held
-     * @throws IllegalArgumentException if the given condition is
-     *         not associated with this synchronizer
-     * @throws NullPointerException if the condition is null
+    /**条件队列是否有节点。
      */
     public final boolean hasWaiters(ConditionObject condition) {
         if (!owns(condition))
@@ -1105,21 +1060,8 @@ public abstract class AbstractQueuedSynchronizer
         return condition.hasWaiters();
     }
 
-    /**
-     * Returns an estimate of the number of threads waiting on the
-     * given condition associated with this synchronizer. Note that
-     * because timeouts and interrupts may occur at any time, the
-     * estimate serves only as an upper bound on the actual number of
-     * waiters.  This method is designed for use in monitoring of the
-     * system state, not for synchronization control.
-     *
-     * @param condition the condition
-     * @return the estimated number of waiting threads
-     * @throws IllegalMonitorStateException if exclusive synchronization
-     *         is not held
-     * @throws IllegalArgumentException if the given condition is
-     *         not associated with this synchronizer
-     * @throws NullPointerException if the condition is null
+    /**条件队列长度
+
      */
     public final int getWaitQueueLength(ConditionObject condition) {
         if (!owns(condition))
