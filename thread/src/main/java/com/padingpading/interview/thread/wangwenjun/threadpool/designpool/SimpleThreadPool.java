@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * 线程池
  */
 public class SimpleThreadPool extends Thread {
+    
 
     //当前线程数量
     private int size;

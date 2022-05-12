@@ -1,38 +1,3 @@
-///*
-// * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// *
-// */
-//
-///*
-// *
-// *
-// *
-// *
-// *
-// * Written by Doug Lea with assistance from members of JCP JSR-166
-// * Expert Group and released to the public domain, as explained at
-// * http://creativecommons.org/publicdomain/zero/1.0/
-// */
-//
 //package com.padingpading.interview.thread.wangwenjun.threadpool.sourcecode;
 //
 //import java.util.ArrayList;
@@ -52,7 +17,7 @@
 //import java.util.concurrent.TimeUnit;
 //import java.util.concurrent.TimeoutException;
 //
-///**提供了一些处理方法
+///**提供一些默认的实现
 // */
 //public abstract class AbstractExecutorService implements ExecutorService {
 //
@@ -68,35 +33,32 @@
 //        return new FutureTask<T>(callable);
 //    }
 //
-//    /**
-//     * @throws RejectedExecutionException {@inheritDoc}
-//     * @throws NullPointerException       {@inheritDoc}
+//    /**没有返回值得提交方法。
 //     */
 //    public Future<?> submit(Runnable task) {
 //        if (task == null) throw new NullPointerException();
+//        //构造出来FutureTask对象
 //        RunnableFuture<Void> ftask = newTaskFor(task, null);
 //        execute(ftask);
 //        return ftask;
 //    }
 //
-//    /**
-//     * @throws RejectedExecutionException {@inheritDoc}
-//     * @throws NullPointerException       {@inheritDoc}
-//     */
 //    public <T> Future<T> submit(Runnable task, T result) {
+//        //指定特定的返回结果。
 //        if (task == null) throw new NullPointerException();
+//        //构造出来FutureTask对象
 //        RunnableFuture<T> ftask = newTaskFor(task, result);
 //        execute(ftask);
 //        return ftask;
 //    }
 //
-//    /**
-//     * @throws RejectedExecutionException {@inheritDoc}
-//     * @throws NullPointerException       {@inheritDoc}
+//    /**提供有返回值的提交方法。
 //     */
 //    public <T> Future<T> submit(Callable<T> task) {
 //        if (task == null) throw new NullPointerException();
+//        //构造出来FutureTask对象
 //        RunnableFuture<T> ftask = newTaskFor(task);
+//        //执行
 //        execute(ftask);
 //        return ftask;
 //    }

@@ -13,11 +13,11 @@ public class A_Lock {
     private  static final Lock lock = new ReentrantLock();
     
     public static void main(String[] args) {
-        IntStream.range(0,2).forEach(i->{
+        IntStream.range(0,10).forEach(i->{
             new Thread(){
                 @Override
                 public void run() {
-                    needLock();
+                    method();
                 }
             }.start();
         });
@@ -33,6 +33,20 @@ public class A_Lock {
             e.printStackTrace();
         } finally {
             System.out.println("thread-"+Thread.currentThread().getName()+"return the lock");
+            //释放锁
+            lock.unlock();
+        }
+    }
+    
+    public static void method(){
+        try {
+            //获取锁
+            lock.lock();
+            Thread.sleep(1000);
+            System.out.println("method");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
             //释放锁
             lock.unlock();
         }
