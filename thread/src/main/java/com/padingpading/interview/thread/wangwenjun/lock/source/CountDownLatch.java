@@ -44,10 +44,9 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
  */
 //主线程必须在join的线程消亡之后,才会执行,但是子线程可能执行到中间点,主线程就可以开始执行,子线程还会去做任务。
 public class CountDownLatch {
-    /**
-     * Synchronization control For CountDownLatch.
-     * Uses AQS state to represent count.
-     */
+    
+    private final Sync sync;
+    
     private static final class Sync extends AbstractQueuedSynchronizer {
         private static final long serialVersionUID = 4982264981922014374L;
 
@@ -58,32 +57,34 @@ public class CountDownLatch {
         int getCount() {
             return getState();
         }
-
+    
+        /**共享锁的获取
+         */
         protected int tryAcquireShared(int acquires) {
             return (getState() == 0) ? 1 : -1;
         }
-
+    
+        /**释放共享锁逻辑。
+         *，该方法只有在count值原来不为0，但是调用后变为0时，才会返回true，否则返回false，并且也可以看出，
+         * 该方法在返回true之后，后面如果再次调用，还是会返回false。也就是说，
+         * 调用该方法只有一种情况会返回true，那就是state值从大于0变为0值时，这时也是所有在门闩前的任务都完成了。
+         */
         protected boolean tryReleaseShared(int releases) {
-            // Decrement count; signal when transition to zero
             for (;;) {
                 int c = getState();
+                //如果已经为0了，直接返回false,可能countdown的次数超过设置的次数。
                 if (c == 0)
                     return false;
                 int nextc = c-1;
                 if (compareAndSetState(c, nextc))
+                    //修改完后恰好等于0
                     return nextc == 0;
             }
         }
     }
 
-    private final Sync sync;
 
-    /**
-     * Constructs a {@code CountDownLatch} initialized with the given count.
-     *
-     * @param count the number of times {@link #countDown} must be invoked
-     *        before threads can pass through {@link #await}
-     * @throws IllegalArgumentException if {@code count} is negative
+    /**入了一个不小于0的任务数，由上面Sync的构造函数可知，这个任务数就是AQS的state的初始值。
      */
     public CountDownLatch(int count) {
         if (count < 0) throw new IllegalArgumentException("count < 0");
@@ -167,15 +168,7 @@ public class CountDownLatch {
         return sync.tryAcquireSharedNanos(1, unit.toNanos(timeout));
     }
 
-    /**
-     * Decrements the count of the latch, releasing all waiting threads if
-     * the count reaches zero.
-     *
-     * <p>If the current count is greater than zero then it is decremented.
-     * If the new count is zero then all waiting threads are re-enabled for
-     * thread scheduling purposes.
-     *
-     * <p>If the current count equals zero then nothing happens.
+    /**释放锁,
      */
     public void countDown() {
         sync.releaseShared(1);

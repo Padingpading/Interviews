@@ -476,6 +476,10 @@ public abstract class AbstractQueuedSynchronizer
             for (;;) {
                 final Node p = node.predecessor();
                 if (p == head) {
+                    //根据返回值判断
+//                    如果该值小于0，则代表当前线程获取共享锁失败
+//                    如果该值大于0，则代表当前线程获取共享锁成功，并且接下来其他线程尝试获取共享锁的行为很可能成功
+//                    如果该值等于0，则代表当前线程获取共享锁成功，但是接下来其他线程尝试获取共享锁的行为会失败
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
                         setHeadAndPropagate(node, r);
@@ -698,8 +702,12 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**共享锁获取
+     * 获取思路:线程在获取的时候,不是只有一个线程独占的逻辑。
      */
     public final void acquireShared(int arg) {
+        //如果该值小于0，则代表当前线程获取共享锁失败
+        //如果该值大于0，则代表当前线程获取共享锁成功，并且接下来其他线程尝试获取共享锁的行为很可能成功
+        //如果该值等于0，则代表当前线程获取共享锁成功，但是接下来其他线程尝试获取共享锁的行为会失败
         if (tryAcquireShared(arg) < 0)
             doAcquireShared(arg);
     }
