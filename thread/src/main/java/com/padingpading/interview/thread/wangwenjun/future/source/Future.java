@@ -51,6 +51,11 @@ import java.util.concurrent.TimeoutException;
 public interface Future<V> {
 
     /**取消任务
+     * cancel失败
+     * 1、任务已经执行完成了
+     * 2、任务已经被取消过了
+     * 3、任务因为某种原因不能被取消
+     * 其它情况下，cancel操作将返回true。
      */
     boolean cancel(boolean mayInterruptIfRunning);
 
@@ -58,14 +63,15 @@ public interface Future<V> {
      */
     boolean isCancelled();
 
-    /**
+    /**如果一个任务已经结束, 则返回true。注意, 这里的任务结束包含了以下三种情况:
+     * 任务正常执行完毕
+     * 任务抛出了异常
+     * 任务已经被取消
      */
     boolean isDone();
 
     /**返回future异步执行任务的结果
      * 如果任务还没有完成,get方法进入阻塞状态。
-     *
-     *
      */
     V get() throws InterruptedException, ExecutionException;
 

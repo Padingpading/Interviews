@@ -333,16 +333,9 @@ public class Executors {
         return new PrivilegedThreadFactory();
     }
 
-    /**
-     * Returns a {@link Callable} object that, when
-     * called, runs the given task and returns the given result.  This
-     * can be useful when applying methods requiring a
-     * {@code Callable} to an otherwise resultless action.
-     * @param task the task to run
-     * @param result the result to return
-     * @param <T> the type of the result
-     * @return a callable object
-     * @throws NullPointerException if task null
+    /**适配器模式,将一个Runnable类型对象适配成Callable类型。
+     *因为Runnable接口没有返回值, 所以为了与Callable兼容, 我们额外传入了一个result参数,
+     * 使得返回的Callable对象的call方法直接执行Runnable的run方法, 然后返回传入的result参数。
      */
     public static <T> Callable<T> callable(Runnable task, T result) {
         if (task == null)
