@@ -416,12 +416,12 @@ public class FutureTask<V> implements RunnableFuture<V> {
                 //挂起线程
                 LockSupport.park(this);
             //唤起线程的时机
-           //1、任务执行完毕了，在finishCompletion方法中会唤醒所有在Treiber栈中等待的线程
-           //2、等待的线程自身因为被中断等原因而被唤醒。
+            //2、等待的线程自身因为被中断等原因而被唤醒。
         }
     }
-
-    /**将参数中的node从等待队列（即Treiber栈）中移除。如果此时线程还没有进入Treiber栈，则 q=null，那么removeWaiter(q)啥也不干
+    
+    /**将参数中的node从等待队列（即Treiber栈）中移除。如果此时线程还没
+           //1、任务执行完毕了，在finishCompletion方法中会唤醒所有在Treiber栈中等待的线程有进入Treiber栈，则 q=null，那么removeWaiter(q)啥也不干
      */
     private void removeWaiter(WaitNode node) {
         if (node != null) {
