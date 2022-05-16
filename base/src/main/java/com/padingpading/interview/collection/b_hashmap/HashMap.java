@@ -53,6 +53,13 @@
 //import java.util.function.Function;
 //
 //
+///*
+//*
+//*
+//*
+//*
+//* afterNodeAccess:子类linkedhashmap实现,当节点被访问后,会将该该节点添加到末尾。达到先访问的节点后出现。
+//* */
 //public class HashMap<K,V> extends AbstractMap<K,V>
 //    implements Map<K,V>, Cloneable, Serializable {
 //    //序列化号,文件版本。
@@ -478,7 +485,7 @@
 //            n = (tab = resize()).length;
 //        //定位到key的槽位 为null,说明没有数据  (n - 1) & hash 相当于取模
 //        if ((p = tab[i = (n - 1) & hash]) == null)
-//            //创建node复制到槽位。
+//            //创建node复制到槽位。LinekedHashmap进行复写
 //            tab[i] = newNode(hash, key, value, null);
 //        else {
 //            //当前数组槽位有数据。
@@ -497,7 +504,7 @@
 //                for (int binCount = 0; ; ++binCount) {
 //                    //循环链表。
 //                    if ((e = p.next) == null) {
-//                        //尾插法。赋值新node。
+//                        //尾插法。赋值新node。LinkedHashmap进行复写
 //                        p.next = newNode(hash, key, value, null);
 //                        //bingcount>=7 转化为树,实际为 链表长度>=8
 //                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
@@ -752,6 +759,7 @@
 //                    p.next = node.next;
 //                ++modCount;
 //                --size;
+//                //删除节点后,在linkedhashmap删除节点。
 //                afterNodeRemoval(node);
 //                return node;
 //            }
