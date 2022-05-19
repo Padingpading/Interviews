@@ -37,7 +37,7 @@
 //     */
 //    public LinkedHashSet() {
 //        super(16, .75f, true);
-//    }
+//    ····}
 //
 //    /**初始化
 //     */
