@@ -1,6 +1,8 @@
 package com.padingpading.interview.thread.wangwenjun.blockqueue;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author libin
@@ -10,5 +12,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Demo {
     
     public static void main(String[] args) {
+        LinkedBlockingQueue
     }
 }
