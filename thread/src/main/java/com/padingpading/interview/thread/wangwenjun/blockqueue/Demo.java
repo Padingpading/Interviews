@@ -1,7 +1,5 @@
 package com.padingpading.interview.thread.wangwenjun.blockqueue;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -12,6 +10,5 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Demo {
     
     public static void main(String[] args) {
-        LinkedBlockingQueue
     }
 }
