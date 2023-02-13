@@ -248,6 +248,14 @@
 //        }
 //    }
 //
+//    // Modes for Completion.tryFire. Signedness matters.
+//    //同步执行
+//    static final int SYNC   =  0;
+//    //异步执行
+//    static final int ASYNC  =  1;
+//    //嵌套执行
+//    static final int NESTED = -1;
+//
 //    final boolean internalComplete(Object r) { // CAS from null to r
 //        return UNSAFE.compareAndSwapObject(this, RESULT, null, r);
 //    }
@@ -449,10 +457,7 @@
 //        return e;
 //    }
 //
-//    // Modes for Completion.tryFire. Signedness matters.
-//    static final int SYNC   =  0;
-//    static final int ASYNC  =  1;
-//    static final int NESTED = -1;
+//
 //
 //    /* ------------- Base Completion classes and operations -------------- */
 //
@@ -2085,6 +2090,7 @@
 //    }
 //
 //    public CompletableFuture<Void> thenRun(Runnable action) {
+//        // 注意这里传入的executor为null，表明同步执行
 //        return uniRunStage(null, action);
 //    }
 //
