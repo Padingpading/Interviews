@@ -35,9 +35,11 @@ public class A_create {
     }
     
     public static void main(String[] args) {
-        CompletableFuture.runAsync(()->System.out.println("hello"))
+        CompletableFuture
+                .runAsync(()->System.out.println("hello"),executor)
                 .thenRun(()->System.out.println("over"))
                 .join();       // 执行完成后输出over操作
+       // CompletableFuture.runAsync().thenAcceptBoth()
     
     }
     
