@@ -1,7 +1,6 @@
 package com.padingpading.interview.jvm.classloader.a_javaclassloader;
 
 
-import sun.security.ec.CurveDB;
 
 /**
  * 拓展类加载器
