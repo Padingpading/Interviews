@@ -333,7 +333,8 @@
 //    }
 //
 //
-//    /**强制释放cpu执行权,不会释放锁
+//    /**
+//     * 强制释放cpu执行权,不会释放锁
 //     */
 //    public static native void yield();
 //
@@ -533,8 +534,8 @@
 //        resume0();
 //    }
 //
-//    /**设置线程优先级,最大10,最小1
-//     *
+//    /**
+//     * 设置线程优先级,最大10,最小1
 //     */
 //    public final void setPriority(int newPriority) {
 //        ThreadGroup g;
@@ -605,7 +606,7 @@
 //    /**join()方法会一直等待线程超时或者终止，代码如下所示。
 //     * join
 //     */
-//    public final void join() throws InterruptedException {
+//        public final void join() throws InterruptedException {
 //        //阻塞,知道当前线程执行完成。
 //        join(0);
 //    }

@@ -40,17 +40,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 
 /**提供了处理任务的方法。
  *	1、提交任务，提交多个任务，
- * 	2、提交任务，通过futrue去管理结果，。
+ * 	2、提交任务，通过future管理结果，。
  * 	3、提交有返回值的任务，和没有返回值的任务，
  */
 public interface ExecutorService extends Executor {

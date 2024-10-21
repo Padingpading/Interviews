@@ -7,18 +7,18 @@ package com.padingpading.interview.jvm.stack;
  */
 public class StackException {
     public static void main(String[] args) {
-
+        method1();
     }
 
-    public void method1() {
-
+    public static void method1() {
+        int i = 1;
+        method2();
     }
 
-    public void method2() {
+    public static void method2() {
         try {
-            method1();
+            System.out.println("123123");
         } catch (Exception e) {
-            e.getMessage();
-        }
+            e.getMessage();        }
     }
 }

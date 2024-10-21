@@ -30,7 +30,7 @@
 ///**
 // * Executor:任务提交
 // * ExecutorService:提供了处理任务的方法
-// * AbstractExecutorService:任务处理的方法
+// * AbstractExecutorService:任务处理的默认方法
 // * 线程池的状态:
 // * 1、线程池本身的状态 ctl的高3位。
 // * 2、线程池运行线程的数量。 ctl的低29位。
