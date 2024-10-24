@@ -617,9 +617,13 @@
 //     * exported).  Otherwise, keys and vals are never null.
 //     */
 //    static class Node<K,V> implements Entry<K,V> {
+//        //hash值
 //        final int hash;
+//        //键
 //        final K key;
+//        //value
 //        volatile V val;
+//        //下一个节点。
 //        volatile Node<K,V> next;
 //
 //        Node(int hash, K key, V val, Node<K,V> next) {
@@ -680,14 +684,19 @@
 //     * cheapest possible way to reduce systematic lossage, as well as
 //     * to incorporate impact of the highest bits that would otherwise
 //     * never be used in index calculations because of table bounds.
+//     * //基于key的hash值,算出一个hash值。
 //     */
 //    static final int spread(int h) {
+//        //h >>> 16 右移16位 32位->16位 获得高16位。
+//        //h ^ h的高16位 = 做异或运算,让高位和低位都参与运算,尽可能避免hash冲突。
+//        //HASH_BITS: 01111111111111111111111111111111 保证Hashcode值一定是个正数。
 //        return (h ^ (h >>> 16)) & HASH_BITS;
 //    }
 //
 //    /**
 //     * Returns a power of two table size for the given desired capacity.
 //     * See Hackers Delight, sec 3.2
+//     * 不是2的n次 转为2的n次。
 //     */
 //    private static final int tableSizeFor(int c) {
 //        int n = c - 1;
@@ -748,6 +757,9 @@
 //     * and so in principle require only release ordering, not
 //     * full volatile semantics, but are currently coded as volatile
 //     * writes to be conservative.
+//     * 获取数组当中某一个数组
+//     * tab:数组
+//     * i:数组下标。
 //     */
 //
 //    @SuppressWarnings("unchecked")
@@ -781,6 +793,7 @@
 //     * Base counter value, used mainly when there is no contention,
 //     * but also as a fallback during table initialization
 //     * races. Updated via CAS.
+//     * 元素的个数
 //     */
 //    private transient volatile long baseCount;
 //
@@ -791,6 +804,13 @@
 //     * when table is null, holds the initial table size to use upon
 //     * creation, or 0 for default. After initialization, holds the
 //     * next element count value upon which to resize the table.
+//     * -1:数组正在初始化
+//     * <-1:正在扩容
+//     * 0:还没有初始化。
+//     * 正数:
+//     *   1、如果没有初始化,代表初始化的长度。
+//     *   2、已经初始化代表扩容的阈值。
+//     *
 //     */
 //    private transient volatile int sizeCtl;
 //
@@ -819,6 +839,7 @@
 //
 //    /**
 //     * Creates a new, empty map with the default initial table size (16).
+//     * 空参构造。
 //     */
 //    public ConcurrentHashMap() {
 //    }
@@ -933,15 +954,22 @@
 //     */
 //    public V get(Object key) {
 //        Node<K,V>[] tab; Node<K,V> e, p; int n, eh; K ek;
+//        // 计算Hash值
 //        int h = spread(key.hashCode());
+//        //判断数组长度
 //        if ((tab = table) != null && (n = tab.length) > 0 &&
+//                //            // 如果hash相等
 //            (e = tabAt(tab, (n - 1) & h)) != null) {
 //            if ((eh = e.hash) == h) {
+//                //                // 如果key值相等，则返回结果
 //                if ((ek = e.key) == key || (ek != null && key.equals(ek)))
 //                    return e.val;
 //            }
+//            //  // 如果eh值小于0 说明hash已经迁移或者是红黑树； 具体的是看各个实现类的find代码
+//            //            // 如果是已经被迁移走的会去新的数组当中获取参数
 //            else if (eh < 0)
 //                return (p = e.find(h, key)) != null ? p.val : null;
+//            //去链表中查找
 //            while ((e = e.next) != null) {
 //                if (e.hash == h &&
 //                    ((ek = e.key) == key || (ek != null && key.equals(ek))))
@@ -1008,44 +1036,72 @@
 //
 //    /** Implementation for put and putIfAbsent */
 //    final V putVal(K key, V value, boolean onlyIfAbsent) {
+//        //key和value不能为空
 //        if (key == null || value == null) throw new NullPointerException();
+//        //通过key算出hash值。
 //        int hash = spread(key.hashCode());
+//        //1:为链表。
+//        //2:红黑树
 //        int binCount = 0;
+//        //遍历table,死循环
 //        for (Node<K,V>[] tab = table;;) {
+//            //tab=数组。f=key索引Node  n=数组长度。 i=key索引位置 fh=key索引位置的hash,不一定是key的hashcode.
 //            Node<K,V> f; int n, i, fh;
+//            //table为空初始化node数据。
 //            if (tab == null || (n = tab.length) == 0)
 //                tab = initTable();
+//            //数组已经初始化了
+//            //1、(table - 1) & hash
+//            //2、获取在数组中的位置。
+//            //3、判断==null.
 //            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+//                //cas操作将数组中的位置插入操作。
 //                if (casTabAt(tab, i, null,
 //                             new Node<K,V>(hash, key, value, null)))
+//                    //cas成功,设置成功,跳出
 //                    break;                   // no lock when adding to empty bin
+//                //没有成功
+//                //设置 f=key索引Node i=key索引位置
 //            }
+//            //MOVED节点是正在被扩容的节点,说明当前容器正在做扩容操作。
 //            else if ((fh = f.hash) == MOVED)
+//                //帮助扩容。
 //                tab = helpTransfer(tab, f);
 //            else {
+//                //出现hash冲突。
 //                V oldVal = null;
+//                //当前数组的头结点,锁住当前桶的位置。
 //                synchronized (f) {
+//                    //判断头结点和刚才的头结点是否一致。
 //                    if (tabAt(tab, i) == f) {
+//                        //hash值判断,是链表或者为空。
 //                        if (fh >= 0) {
 //                            binCount = 1;
+//                            //遍历当前链表。
 //                            for (Node<K,V> e = f;; ++binCount) {
 //                                K ek;
+//                                //hash相等 并且key也相同
 //                                if (e.hash == hash &&
 //                                    ((ek = e.key) == key ||
 //                                     (ek != null && key.equals(ek)))) {
+//                                    //赋值
 //                                    oldVal = e.val;
+//                                    //是否覆盖数据,true:覆盖,false:不覆盖。
 //                                    if (!onlyIfAbsent)
 //                                        e.val = value;
 //                                    break;
 //                                }
+//                                //hash值不一样,判断尾部节点是否为null,并添加节点到上一个节点的尾部。
 //                                Node<K,V> pred = e;
 //                                if ((e = e.next) == null) {
 //                                    pred.next = new Node<K,V>(hash, key,
 //                                                              value, null);
+//                                    //添加成功,跳出。
 //                                    break;
 //                                }
 //                            }
 //                        }
+//                        //判断是否为树结构。
 //                        else if (f instanceof TreeBin) {
 //                            Node<K,V> p;
 //                            binCount = 2;
@@ -1059,8 +1115,10 @@
 //                    }
 //                }
 //                if (binCount != 0) {
+//                    //链表长度>8,是否需要将链表转为红黑树。
 //                    if (binCount >= TREEIFY_THRESHOLD)
 //                        treeifyBin(tab, i);
+//                    //以前存在值,返回老值
 //                    if (oldVal != null)
 //                        return oldVal;
 //                    break;
@@ -2219,22 +2277,34 @@
 //
 //    /**
 //     * Initializes table, using the size recorded in sizeCtl.
+//     * 初始化数组。
 //     */
 //    private final Node<K,V>[] initTable() {
 //        Node<K,V>[] tab; int sc;
+//        //
 //        while ((tab = table) == null || tab.length == 0) {
 //            if ((sc = sizeCtl) < 0)
+//                //正在初始化或者正在扩容,多线程下只需要一个线程进行扩容和初始化。
 //                Thread.yield(); // lost initialization race; just spin
+//            //cas方式将 SIZECTL设置为-1,设置成功才会初始化,否则跳出循环,正在初始化。
 //            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
 //                try {
+//                    //开始初始化
 //                    if ((tab = table) == null || tab.length == 0) {
+//                        //1、第一次初始化,默认长度16。即DEFAULT_CAPACITY
 //                        int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+//                        //Node数组
 //                        @SuppressWarnings("unchecked")
 //                        Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
+//                        //赋值。
 //                        table = tab = nt;
+//                        //得到下次扩容的阈值,
+//                        //10000-100=16-4 =16
+//                        //sc = 0.75n
 //                        sc = n - (n >>> 2);
 //                    }
 //                } finally {
+//                    //将sc赋值sizeCtl
 //                    sizeCtl = sc;
 //                }
 //                break;
@@ -2254,6 +2324,8 @@
 //     * @param check if <0, don't check resize, if <= 1 only check if uncontended
 //     */
 //    private final void addCount(long x, int check) {
+//        //x->添加的元素个数。
+//        //s=添加后的元素个数。
 //        CounterCell[] as; long b, s;
 //        if ((as = counterCells) != null ||
 //            !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
@@ -2270,10 +2342,14 @@
 //                return;
 //            s = sumCount();
 //        }
+//        //元素个数。
 //        if (check >= 0) {
 //            Node<K,V>[] tab, nt; int n, sc;
+//            //添加后的元素个数是否大于扩容的阈值。
 //            while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
 //                   (n = tab.length) < MAXIMUM_CAPACITY) {
+//                //得到扩容戳 32为数值 高16位做扩容标识 低16位做扩容线程。
+//                //n = 数组长度。
 //                int rs = resizeStamp(n);
 //                if (sc < 0) {
 //                    if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
@@ -2285,6 +2361,7 @@
 //                }
 //                else if (U.compareAndSwapInt(this, SIZECTL, sc,
 //                                             (rs << RESIZE_STAMP_SHIFT) + 2))
+//                    //扩容。
 //                    transfer(tab, null);
 //                s = sumCount();
 //            }
@@ -2297,13 +2374,16 @@
 //    final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
 //        Node<K,V>[] nextTab; int sc;
 //        if (tab != null && (f instanceof ForwardingNode) &&
+//                //新数组不等于null.
 //            (nextTab = ((ForwardingNode<K,V>)f).nextTable) != null) {
 //            int rs = resizeStamp(tab.length);
 //            while (nextTab == nextTable && table == tab &&
 //                   (sc = sizeCtl) < 0) {
 //                if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
+//                        //transferIndex是否领完成。
 //                    sc == rs + MAX_RESIZERS || transferIndex <= 0)
 //                    break;
+//                //sizeCtl:扩容线程。
 //                if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) {
 //                    transfer(tab, nextTab);
 //                    break;
@@ -2318,13 +2398,19 @@
 //     * Tries to presize table to accommodate the given number of elements.
 //     *
 //     * @param size number of elements (doesn't need to be perfectly accurate)
+//     * 数组扩容操作。
 //     */
 //    private final void tryPresize(int size) {
+//        //对扩容数组长度做一波判断。
+//        //1、如果是最大值,给最大值。
+//        //2、不是最大值,size + (size >>> 1) + 1: 保证是2的次幂。
 //        int c = (size >= (MAXIMUM_CAPACITY >>> 1)) ? MAXIMUM_CAPACITY :
 //            tableSizeFor(size + (size >>> 1) + 1);
 //        int sc;
 //        while ((sc = sizeCtl) >= 0) {
+//            //1、第一种 初始化数组 putAll 第二种 已经初始化完成。
 //            Node<K,V>[] tab = table; int n;
+//            //初始化数组操作。
 //            if (tab == null || (n = tab.length) == 0) {
 //                n = (sc > c) ? sc : c;
 //                if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
@@ -2340,10 +2426,15 @@
 //                    }
 //                }
 //            }
+//            //扩容长度,小于扩容阈值。
+//            //可能有并发操作,完成扩容。
 //            else if (c <= sc || n >= MAXIMUM_CAPACITY)
 //                break;
 //            else if (tab == table) {
+//                //得到扩容戳 32为数值 高16位做扩容标识 低16位做扩容线程。
+//                //n = 数组长度。
 //                int rs = resizeStamp(n);
+//                //sc < 0 已经开始扩容。
 //                if (sc < 0) {
 //                    Node<K,V>[] nt;
 //                    if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
@@ -2353,6 +2444,7 @@
 //                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))
 //                        transfer(tab, nt);
 //                }
+//                //没有线程扩容,开始扩容。
 //                else if (U.compareAndSwapInt(this, SIZECTL, sc,
 //                                             (rs << RESIZE_STAMP_SHIFT) + 2))
 //                    transfer(tab, null);
@@ -2365,94 +2457,175 @@
 //     * above for explanation.
 //     */
 //    private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
+//        //n=32。扩容为64
 //        int n = tab.length, stride;
+//        //数组长度太大了,这里需要多线程去对数组进行copy,将原来的数组进行分段,充分发挥cpu性能。
+//        //cpu>1?
+//        //小于1 如果小于16步长为16,大于等于16 则为当前元素个数。
+//        //大于1  n/8*cpu 每个cpu开8个线程,然后计算出每个cpu移动的个数。
 //        if ((stride = (NCPU > 1) ? (n >>> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
 //            stride = MIN_TRANSFER_STRIDE; // subdivide range
 //        if (nextTab == null) {            // initiating
 //            try {
+//                //新数组大小,是原来的一倍。
 //                @SuppressWarnings("unchecked")
 //                Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n << 1];
+//                //赋值到新数组。
 //                nextTab = nt;
 //            } catch (Throwable ex) {      // try to cope with OOME
+//                //OOM异常 或者数组长度到最大值。
 //                sizeCtl = Integer.MAX_VALUE;
 //                return;
 //            }
+//            //新复制新数组。
 //            nextTable = nextTab;
+//            //线程领取任务前的核心参数。 老数组长度。
 //            transferIndex = n;
 //        }
+//        //新数组长度。
 //        int nextn = nextTab.length;
+//        //老数组迁移数据完成之后,放到老数组。
 //        ForwardingNode<K,V> fwd = new ForwardingNode<K,V>(nextTab);
+//        //领任务的核心标识。
 //        boolean advance = true;
+//        //扩容结束了吗
 //        boolean finishing = false; // to ensure sweep before committing nextTab
+//        //扩容的for循环。
 //        for (int i = 0, bound = 0;;) {
 //            Node<K,V> f; int fh;
+//            //i:最大下标。
+//            //bound:最小下标。
 //            while (advance) {
+//                //nextIndex:老数组长度。
 //                int nextIndex, nextBound;
+//                //迁移下一个索引数据。
 //                if (--i >= bound || finishing)
 //                    advance = false;
+//                //没有任何任务可以领取。
+//                //nextIndex=默认为0 transferIndex下一个要开始迁移的头地址,异味的结束。
 //                else if ((nextIndex = transferIndex) <= 0) {
 //                    i = -1;
 //                    advance = false;
 //                }
+//                //开始领取任务。
+//                //n=32  stride=16 领取:32-16的元素。
 //                else if (U.compareAndSwapInt
 //                         (this, TRANSFERINDEX, nextIndex,
 //                          nextBound = (nextIndex > stride ?
 //                                       nextIndex - stride : 0))) {
+//                    //16开头元素
 //                    bound = nextBound;
+//                    //31结尾元素。
 //                    i = nextIndex - 1;
 //                    advance = false;
 //                }
 //            }
+//            //上一步赋值-1,没有任务可领
 //            if (i < 0 || i >= n || i + n >= nextn) {
 //                int sc;
+//                //结束,第一次进不来,检查完之后,第二次才能进来。
 //                if (finishing) {
+//                    //真正结束,
 //                    nextTable = null;
 //                    table = nextTab;
+//                    //设置下次扩容的阈值。扩容后的0.75倍
 //                    sizeCtl = (n << 1) - (n >>> 1);
 //                    return;
 //                }
+//                //当前线程没有任务可领了
+//                //设置低位-1,当前线程退出扩容操作。
 //                if (U.compareAndSwapInt(this, SIZECTL, sc = sizeCtl, sc - 1)) {
+//                    //是否是最后一个扩容的线程。
+//                    //
 //                    if ((sc - 2) != resizeStamp(n) << RESIZE_STAMP_SHIFT)
 //                        return;
+//                    //说明是最后一个迁移数据的线程,
+//                    //finishing任务结束 advance领取任务的标识。
 //                    finishing = advance = true;
+//                    //I设置为老数组长度,进去重新检查一次。
 //                    i = n; // recheck before commit
 //                }
 //            }
 //            else if ((f = tabAt(tab, i)) == null)
+//                //迁移位置的为null,设置fwd
 //                advance = casTabAt(tab, i, null, fwd);
 //            else if ((fh = f.hash) == MOVED)
+//                //迁移位置的为fwd
 //                advance = true; // already processed
 //            else {
+//                //从数组末尾向前遍历,知道找到头结点,锁住头结点,有值进行处理,进行数组的copy.
 //                synchronized (f) {
 //                    if (tabAt(tab, i) == f) {
 //                        Node<K,V> ln, hn;
-//                        if (fh >= 0) {
+//                        //hash值是否等于0
+//                        if (fh >= 0) {//该节点的hash值大于等于0，说明是一个Node节点
+//                            /*
+//                             * 1100 & (16-1) 1111 = 1100 = 12位置。
+//                             * 1100 & 10000 = 0
+//                             * 11100 & 10000 = 1 高位。
+//                             * 因为n的值为数组的长度，且是power(2,x)的，所以，在&操作的结果只可能是0或者n
+//                             * 根据这个规则
+//                             *         0-->  放在新表的相同位置
+//                             *         n-->  放在新表的（n+原来位置）
+//                             */
 //                            int runBit = fh & n;
 //                            Node<K,V> lastRun = f;
+//                            /*
+//                             * lastRun 表示的是需要复制的最后一个节点
+//                             * 每当新节点的hash&n -> b 发生变化的时候，就把runBit设置为这个结果b
+//                             * 这样for循环之后，runBit的值就是最后不变的hash&n的值
+//                             * 而lastRun的值就是最后一次导致hash&n 发生变化的节点(假设为p节点)
+//                             * 为什么要这么做呢？因为p节点后面的节点的hash&n 值跟p节点是一样的，
+//                             * 所以在复制到新的table的时候，它肯定还是跟p节点在同一个位置
+//                             * 在复制完p节点之后，p节点的next节点还是指向它原来的节点，就不需要进行复制了，自己就被带过去了
+//                             * 这也就导致了一个问题就是复制后的链表的顺序并不一定是原来的倒序
+//                             */
 //                            for (Node<K,V> p = f.next; p != null; p = p.next) {
+//                                //老节点的位置。
 //                                int b = p.hash & n;
 //                                if (b != runBit) {
+//                                    //找到最后一个不需要
 //                                    runBit = b;
 //                                    lastRun = p;
 //                                }
 //                            }
+//                            //低位节点
 //                            if (runBit == 0) {
 //                                ln = lastRun;
 //                                hn = null;
 //                            }
+//                            //高位节点
 //                            else {
 //                                hn = lastRun;
 //                                ln = null;
 //                            }
+//                            /*
+//                             * 构造两个链表，顺序大部分和原来是反的
+//                             * 分别放到原来的位置和新增加的长度的相同位置(i/n+i)
+//                             */
+//                            //遍历
 //                            for (Node<K,V> p = f; p != lastRun; p = p.next) {
 //                                int ph = p.hash; K pk = p.key; V pv = p.val;
 //                                if ((ph & n) == 0)
+//                                    /* 低位。
+//                                     * 假设runBit的值为0，
+//                                     * 则第一次进入这个设置的时候相当于把旧的序列的最后一次发生hash变化的节点(该节点后面可能还有hash计算后同为0的节点)设置到旧的table的第一个hash计算后为0的节点下一个节点
+//                                     * 并且把自己返回，然后在下次进来的时候把它自己设置为后面节点的下一个节点
+//                                     */
 //                                    ln = new Node<K,V>(ph, pk, pv, ln);
 //                                else
+//                                    /* 高位。
+//                                     * 假设runBit的值不为0，
+//                                     * 则第一次进入这个设置的时候相当于把旧的序列的最后一次发生hash变化的节点(该节点后面可能还有hash计算后同不为0的节点)设置到旧的table的第一个hash计算后不为0的节点下一个节点
+//                                     * 并且把自己返回，然后在下次进来的时候把它自己设置为后面节点的下一个节点
+//                                     */
 //                                    hn = new Node<K,V>(ph, pk, pv, hn);
 //                            }
+//                            //设置到数组,低位链表中。
 //                            setTabAt(nextTab, i, ln);
+//                            //设置到数组,高位链表中。
 //                            setTabAt(nextTab, i + n, hn);
+//                            //设置当前位置为fwd,做check标识老数组已经迁移干净了
 //                            setTabAt(tab, i, fwd);
 //                            advance = true;
 //                        }
@@ -2607,12 +2780,15 @@
 //    /**
 //     * Replaces all linked nodes in bin at given index unless table is
 //     * too small, in which case resizes instead.
+//     * 链表转为红黑树。
 //     */
 //    private final void treeifyBin(Node<K,V>[] tab, int index) {
 //        Node<K,V> b; int n, sc;
 //        if (tab != null) {
+//            //数组长度是否大于<64,数组扩容
 //            if ((n = tab.length) < MIN_TREEIFY_CAPACITY)
 //                tryPresize(n << 1);
+//            //数组长度大于64,转为红黑树。
 //            else if ((b = tabAt(tab, index)) != null && b.hash >= 0) {
 //                synchronized (b) {
 //                    if (tabAt(tab, index) == b) {
@@ -6278,6 +6454,10 @@
 //    private static final sun.misc.Unsafe U;
 //    private static final long SIZECTL;
 //    private static final long TRANSFERINDEX;
+//
+//    /**
+//     * 元素的个数
+//     */
 //    private static final long BASECOUNT;
 //    private static final long CELLSBUSY;
 //    private static final long CELLVALUE;
