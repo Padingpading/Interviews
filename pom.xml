@@ -19,6 +19,7 @@
         <module>redis</module>
         <module>jvm</module>
         <module>thread</module>
+        <module>SpringCloud</module>
     </modules>
     
     <packaging>pom</packaging>
