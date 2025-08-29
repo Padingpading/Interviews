@@ -626,6 +626,7 @@
 //                            next = e.next;
 //                            //元素的hash & oldCap.lenth =0 d位置不变
 //                            //oldCap为新的容器的大小。
+//                            //e.hash & oldCap 高位  扩容之后决定在那个位置是取决于 hash在 oldCap的位置是0还是1.
 //                            if ((e.hash & oldCap) == 0) {
 //                                if (loTail == null)
 //                                    //赋值head结点
