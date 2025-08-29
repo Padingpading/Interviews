@@ -20,6 +20,7 @@
         <module>jvm</module>
         <module>thread</module>
         <module>SpringCloud</module>
+        <module>Transaction</module>
     </modules>
     
     <packaging>pom</packaging>
