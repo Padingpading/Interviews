@@ -60,6 +60,9 @@ public interface ExecutorService extends Executor {
     void shutdown();
 
     /**
+     * 1、立即关闭
+     * 2、立即关闭正在执行的任务。
+     * 2、返回没有执行完的任务。
      */
     List<Runnable> shutdownNow();
 

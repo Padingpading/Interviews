@@ -7,6 +7,10 @@ package com.padingpading.interview.designpattern.signle;
 public class StaticSingletonObject {
     private static  volatile StaticSingletonObject instance;
     
+    static {
+        System.out.println("123");
+    }
+    
     private  StaticSingletonObject() {
     }
     public  static class StaticSingletonInnerObject {

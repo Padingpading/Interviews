@@ -606,8 +606,8 @@
 //    /**join()方法会一直等待线程超时或者终止，代码如下所示。
 //     * join
 //     */
-//        public final void join() throws InterruptedException {
-//        //阻塞,知道当前线程执行完成。
+//    public final void join() throws InterruptedException {
+//        //阻塞,直到当前线程执行完成。
 //        join(0);
 //    }
 //

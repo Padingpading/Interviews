@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
 /**接口:
  *  Lock:获取锁和释放锁。
@@ -175,7 +174,6 @@ public class ReentrantLock implements java.util.concurrent.locks.Lock, java.io.S
 
         /**非公平锁获取
          * 1、第一次获取锁,不管有没有等待的线程,直接去抢。
-         * 2、
          */
         @Override
         final void lock() {

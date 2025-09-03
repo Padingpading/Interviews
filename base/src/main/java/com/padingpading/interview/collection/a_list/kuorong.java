@@ -1,6 +1,5 @@
 package com.padingpading.interview.collection.a_list;
 
-import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;

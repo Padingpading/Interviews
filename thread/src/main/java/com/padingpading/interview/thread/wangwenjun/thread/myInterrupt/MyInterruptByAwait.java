@@ -26,6 +26,7 @@ public class MyInterruptByAwait implements Runnable {
                     e.printStackTrace();
                 }
             }
+            System.out.println(Thread.currentThread().isInterrupted());
             System.out.println("执行中");
         }
     }

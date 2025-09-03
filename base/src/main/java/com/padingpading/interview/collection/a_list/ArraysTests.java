@@ -1,7 +1,6 @@
 package com.padingpading.interview.collection.a_list;
 
 
-import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collections;

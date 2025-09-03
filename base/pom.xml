@@ -10,8 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     
     <artifactId>base</artifactId>
-    <packaging>base</packaging>
-    
+    <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>

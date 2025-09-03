@@ -1,16 +1,12 @@
 package com.padingpading.interview.collection.a_list;
 
 import com.padingpading.interview.context.SysConstant;
-import com.padingpading.interview.servial.H_customize3;
-import org.apache.catalina.LifecycleState;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author libin

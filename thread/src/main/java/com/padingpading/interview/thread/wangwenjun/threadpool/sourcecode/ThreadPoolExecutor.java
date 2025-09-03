@@ -36,7 +36,8 @@
 // * 2、线程池运行线程的数量。 ctl的低29位。
 // */
 //public class ThreadPoolExecutor extends AbstractExecutorService {
-//    /**线程池的状态&线程池线程的个数。
+//    /**
+//     * 线程池的状态&线程池线程的个数。
 //     */
 //    private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
 //    //29位,线程池中管理线程的数量。
@@ -653,7 +654,7 @@
 //        mainLock.lock();
 //        try {
 //            //将执行任务的个数,添加到线程池完成任务的个数。
-//            completedTaskCount += w.completedTasks;、
+//            completedTaskCount += w.completedTasks;
 //            //移除worker.
 //            workers.remove(w);
 //        } finally {
@@ -858,7 +859,8 @@
 //        this.handler = handler;
 //    }
 //
-//    /**执行入口
+//    /**
+//     * 执行入口
 //     */
 //    public void execute(Runnable command) {
 //        if (command == null)
