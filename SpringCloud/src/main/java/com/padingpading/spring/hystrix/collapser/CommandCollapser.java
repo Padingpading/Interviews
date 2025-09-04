@@ -1,6 +1,5 @@
 package com.padingpading.spring.hystrix.collapser;
 
-import com.netflix.hystrix.Hystrix;
 import com.netflix.hystrix.HystrixCollapser;
 import com.netflix.hystrix.HystrixCollapserKey;
 import com.netflix.hystrix.HystrixCollapserProperties;
@@ -73,10 +72,10 @@ public class CommandCollapser extends HystrixCollapser<List<ProductInfo>,Product
             //请求结果
     
             List<ProductInfo> productInfos = new ArrayList<>();
-            ProductInfo productInfo = new ProductInfo("1");
-            ProductInfo productInfo1 = new ProductInfo("2");
-            productInfos.add(productInfo);
-            productInfos.add(productInfo1);
+//            ProductInfo productInfo = new ProductInfo("1");
+//            ProductInfo productInfo1 = new ProductInfo("2");
+//            productInfos.add(productInfo);
+//            productInfos.add(productInfo1);
             return productInfos;
         }
     }

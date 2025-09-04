@@ -1,6 +1,5 @@
 package com.padingpading.spring.cacheable;
 
-import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.Documented;
@@ -18,7 +17,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@Reflective
 public @interface CacheEvict {
     @AliasFor("cacheNames")
     String[] value() default {};

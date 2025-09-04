@@ -1,5 +1,9 @@
 package com.padingpading.spring.hystrix.collapser;
 
+
+import lombok.Data;
+
+@Data
 /**
  * @author libin
  * @description
@@ -8,12 +12,5 @@ package com.padingpading.spring.hystrix.collapser;
 public class ProductInfo {
     
     private  String id;
-    
-    public ProductInfo(String id) {
-        this.id = id;
-    }
-    
-    public String getId() {
-        return id;
-    }
+    private  String name;
 }
